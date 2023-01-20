@@ -5,5 +5,5 @@ build:
 
 clean:
 	@echo "Cleaning build products... 🔄"
-	@rm -f ./sam
+	@rm -f ./bin/sam*
 	@echo "Cleaning done ✅"
