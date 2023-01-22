@@ -32,8 +32,6 @@ func GetAvailableKeys() []*Key {
 
 		fullPath := keyDirPath + string(os.PathSeparator) + path
 
-		fmt.Println(fullPath)
-
 		if !strings.HasSuffix(path, fileSuffix) {
 			return nil
 		}
