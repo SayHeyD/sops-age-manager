@@ -9,13 +9,15 @@ import (
 
 type Key struct {
 	Name       string
+	FileName   string
 	PublicKey  string
 	PrivateKey string
 }
 
-func NewKey(name string, fileContents string) *Key {
+func NewKey(name string, path string, fileContents string) *Key {
 	return &Key{
 		Name:       name,
+		FileName:   path,
 		PublicKey:  getPubKeyFromFileContents(fileContents),
 		PrivateKey: getPrivateKeyFromFileContents(fileContents),
 	}

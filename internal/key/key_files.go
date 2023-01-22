@@ -44,7 +44,7 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 			return err
 		}
 
-		key := NewKey(keyName, string(keyFileContent))
+		key := NewKey(keyName, fullPath, string(keyFileContent))
 
 		for _, processedKey := range keys {
 			if key.Name == processedKey.Name {
