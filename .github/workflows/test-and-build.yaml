@@ -17,10 +17,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    on:
-      workflow_run:
-        workflows:
-          - "test"
+    needs: test
     steps:
       - uses: actions/checkout@v3
 
