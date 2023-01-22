@@ -8,18 +8,20 @@ import (
 	"strings"
 )
 
-func GetAvailableKeys() []*Key {
+func GetAvailableKeys(keyDirPath string) []*Key {
 	var keys []*Key
 
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal(fmt.Sprintf("cannot get the users home directory: %v", err))
+	if keyDirPath == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(fmt.Sprintf("cannot get the users home directory: %v", err))
+		}
+
+		keyDirPath = homeDir + string(os.PathSeparator) + ".age"
 	}
 
-	keyDirPath := homeDir + string(os.PathSeparator) + ".age"
-
 	keyDir := os.DirFS(keyDirPath)
-	err = fs.WalkDir(keyDir, ".", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(keyDir, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
