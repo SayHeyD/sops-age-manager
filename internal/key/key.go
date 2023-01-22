@@ -28,7 +28,9 @@ func getPrivateKeyFromFileContents(contents string) string {
 
 	_, privateKeyWithoutPrefix, _ := strings.Cut(contents, privateKeyPrefix)
 
-	return privateKeyPrefix + privateKeyWithoutPrefix
+	privateKeyWithPrefix := privateKeyPrefix + privateKeyWithoutPrefix
+
+	return strings.Trim(privateKeyWithPrefix, "\n\t ")
 }
 
 func getPubKeyFromFileContents(contents string) string {

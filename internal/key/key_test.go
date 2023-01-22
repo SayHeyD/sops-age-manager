@@ -14,6 +14,12 @@ const ageKeyFileContent = `# created: 2023-01-19T18:37:24+01:00
 # public key: age1z9zvlcr2j3gt7mc9flmvyxm264v5aqyq0u2l46rlkg2c2fdzytgx7xl3qm
 AGE-SECRET-KEY-HHS36XWKCVDKEKJ2M7WKQN3MFYUGIP4WWM7DT1CFANZUT5LT3K8ZRFZFGV3`
 
+// ageKeyFileContentWithNewLine is NOT a real age key pair
+const ageKeyFileContentWithNewLine = `# created: 2023-01-19T18:37:24+01:00
+# public key: age1z9zvlcr2j3gt7mc9flmvyxm264v5aqyq0u2l46rlkg2c2fdzytgx7xl3qm
+AGE-SECRET-KEY-HHS36XWKCVDKEKJ2M7WKQN3MFYUGIP4WWM7DT1CFANZUT5LT3K8ZRFZFGV3
+`
+
 // ageKeyPublicKey is NOT a real age public key
 const ageKeyPublicKey = "age1z9zvlcr2j3gt7mc9flmvyxm264v5aqyq0u2l46rlkg2c2fdzytgx7xl3qm"
 
@@ -53,6 +59,15 @@ func TestNewKeyFunctionCreatesKeyWithCorrectFilePath(t *testing.T) {
 
 	if key.FileName != wantedFilePath {
 		t.Fatalf("Wanted file path \"%s\" doesn't match with file path on generated key: \"%s\"", wantedFilePath, key.FileName)
+	}
+}
+
+func TestNewKeyFunctionCreatesKeyWithCorrectPrivateKeyWithoutNewline(t *testing.T) {
+	t.Parallel()
+	key := NewKey(wantedKeyName, wantedFilePath, ageKeyFileContentWithNewLine)
+
+	if key.PrivateKey != ageKeyPrivateKey {
+		t.Fatalf("Wanted private key \"%s\" doesn't match with private key on generated key: \"%s\"", ageKeyPrivateKey, key.PrivateKey)
 	}
 }
 
