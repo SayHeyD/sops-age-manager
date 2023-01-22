@@ -17,6 +17,7 @@ const ageKeyPublicKey = "age1z9zvlcr2j3gt7mc9flmvyxm264v5aqyq0u2l46rlkg2c2fdzytg
 const ageKeyPrivateKey = "AGE-SECRET-KEY-HHS36XWKCVDKEKJ2M7WKQN3MFYUGIP4WWM7DT1CFANZUT5LT3K8ZRFZFGV3"
 
 func TestNewKeyFunctionCreatesKeyWithCorrectName(t *testing.T) {
+	t.Parallel()
 	wantedKeyName := "test_key"
 	key := NewKey(wantedKeyName, ageKeyFileContent)
 
@@ -26,6 +27,7 @@ func TestNewKeyFunctionCreatesKeyWithCorrectName(t *testing.T) {
 }
 
 func TestNewKeyFunctionCreatesKeyWithCorrectPrivateKey(t *testing.T) {
+	t.Parallel()
 	key := NewKey("test_key", ageKeyFileContent)
 
 	if key.PrivateKey != ageKeyPrivateKey {
@@ -34,6 +36,7 @@ func TestNewKeyFunctionCreatesKeyWithCorrectPrivateKey(t *testing.T) {
 }
 
 func TestNewKeyFunctionCreatesKeyWithCorrectPublicKey(t *testing.T) {
+	t.Parallel()
 	key := NewKey("test_key", ageKeyFileContent)
 
 	if key.PublicKey != ageKeyPublicKey {
@@ -42,6 +45,7 @@ func TestNewKeyFunctionCreatesKeyWithCorrectPublicKey(t *testing.T) {
 }
 
 func TestSetActiveSetsEnvVarCorrectly(t *testing.T) {
+	t.Parallel()
 	key := NewKey("test_key", ageKeyFileContent)
 	key.SetActive()
 
