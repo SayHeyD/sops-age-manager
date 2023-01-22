@@ -30,7 +30,7 @@ func main() {
 		log.Fatal("No key name provided")
 	}
 
-	keys := key.GetAvailableKeys()
+	keys := key.GetAvailableKeys("")
 
 	for _, ageKey := range keys {
 		if ageKey.Name == *activeKey {
