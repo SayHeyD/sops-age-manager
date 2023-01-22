@@ -43,6 +43,13 @@ func GetAvailableKeys() []*Key {
 		}
 
 		key := NewKey(keyName, string(keyFileContent))
+
+		for _, processedKey := range keys {
+			if key.Name == processedKey.Name {
+				return fmt.Errorf("multiple keys with the name \"%s\" were detected", key.Name)
+			}
+		}
+
 		keys = append(keys, key)
 
 		return nil
