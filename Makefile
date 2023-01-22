@@ -4,7 +4,7 @@ build:
 
 test:
 	@echo "Running test... 🔄"
-	@go test ./... && echo "Tests finished ✅" || (echo echo "Tests failed ❌"; exit 1)
+	@go test ./... && echo "Tests finished successfully ✅" || (echo echo "Tests finished with errors ❌"; exit 1)
 
 clean:
 	@echo "Cleaning build products... 🔄"
