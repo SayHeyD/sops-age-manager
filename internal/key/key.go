@@ -17,28 +17,28 @@ func NewKey(name string, fileContents string) *Key {
 	return &Key{
 		Name:       name,
 		PublicKey:  getPubKeyFromFileContents(fileContents),
-		PrivateKey: getPrivKeyFromFileContents(fileContents),
+		PrivateKey: getPrivateKeyFromFileContents(fileContents),
 	}
 }
 
-func getPrivKeyFromFileContents(contents string) string {
+func getPrivateKeyFromFileContents(contents string) string {
 	privateKeyPrefix := "AGE-SECRET-KEY"
 
-	_, privKeyWithoutPrefix, _ := strings.Cut(contents, privateKeyPrefix)
+	_, privateKeyWithoutPrefix, _ := strings.Cut(contents, privateKeyPrefix)
 
-	return privateKeyPrefix + privKeyWithoutPrefix
+	return privateKeyPrefix + privateKeyWithoutPrefix
 }
 
 func getPubKeyFromFileContents(contents string) string {
-	pubKeyPrefix := "public key: "
+	publicKeyPrefix := "public key: "
 	privateKeyPrefix := "AGE-SECRET-KEY"
 
-	_, afterPubKeyString, _ := strings.Cut(contents, pubKeyPrefix)
-	pubKey, _, _ := strings.Cut(afterPubKeyString, privateKeyPrefix)
+	_, afterPublicKeyString, _ := strings.Cut(contents, publicKeyPrefix)
+	publicKey, _, _ := strings.Cut(afterPublicKeyString, privateKeyPrefix)
 
-	pubKey = pubKey[:len(pubKey)-1]
+	publicKey = publicKey[:len(publicKey)-1]
 
-	return pubKey
+	return publicKey
 }
 
 func (k *Key) SetActive() {
