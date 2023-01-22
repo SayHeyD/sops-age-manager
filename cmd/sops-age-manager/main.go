@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/SayHeyD/sops-age-manage/internal/key"
+	"log"
 )
 
 func main() {
@@ -25,8 +26,8 @@ func main() {
 		fmt.Println(*systemTrayIcon)
 	}
 
-	if *activeKey != "" {
-		fmt.Println(*activeKey)
+	if *activeKey == "" {
+		log.Fatal("No key name provided")
 	}
 
 	key.GetAvailableKeys()
