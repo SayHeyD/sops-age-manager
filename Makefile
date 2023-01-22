@@ -1,6 +1,6 @@
 build:
 	@echo "Building application... 🔄"
-	@go build -o bin/sam ./cmd/sops-age-manager && echo "Finished building ✅" || (echo echo "Build failed ❌"; exit 1)
+	@go build -o bin/sam . && echo "Finished building ✅" || (echo echo "Build failed ❌"; exit 1)
 
 test:
 	@echo "Running test... 🔄"

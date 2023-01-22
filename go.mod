@@ -1,4 +1,4 @@
-module github.com/SayHeyD/sops-age-manage
+module github.com/SayHeyD/sops-age-manager
 
 go 1.19
 

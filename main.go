@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/SayHeyD/sops-age-manage/internal/key"
+	"github.com/SayHeyD/sops-age-manager/internal/key"
 	"log"
 )
 
