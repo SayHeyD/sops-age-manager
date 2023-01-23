@@ -36,3 +36,11 @@ func GenerateNewUniqueTestDir(t *testing.T) string {
 
 	return testDir
 }
+
+// CleanTestDir removes the test directory and all contents of it.
+func CleanTestDir(t *testing.T, directory string) {
+	err := os.RemoveAll(directory)
+	if err != nil {
+		t.Fatalf("Could not delete test directory \"%s\": %v", directory, err)
+	}
+}
