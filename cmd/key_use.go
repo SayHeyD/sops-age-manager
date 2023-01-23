@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/SayHeyD/sops-age-manager/internal/key"
+	"github.com/SayHeyD/sops-age-manager/pkg/key"
 	"github.com/spf13/cobra"
 	"log"
 )
