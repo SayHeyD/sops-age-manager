@@ -27,12 +27,4 @@ func init() {
 	cobra.OnInitialize()
 
 	rootCmd.AddCommand(keyCommands)
-
-	/*rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
-
-	rootCmd.PersistentFlags().StringVarP(&userLicense, "license", "l", "", "name of license for the project")
-	rootCmd.PersistentFlags().Bool("viper", true, "use Viper for configuration")
-
-	rootCmd.AddCommand(addCmd)
-	rootCmd.AddCommand(initCmd)*/
 }
