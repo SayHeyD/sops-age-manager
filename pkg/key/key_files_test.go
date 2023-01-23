@@ -53,6 +53,7 @@ in order to execute tests in an isolated directory. The string returned is the a
 */
 func prepareKeyTestDir(t *testing.T) string {
 	testDir := test.GenerateNewUniqueTestDir(t)
+	defer test.CleanTestDir(t, testDir)
 
 	keys := getTestKeys()
 
@@ -79,6 +80,7 @@ func prepareKeyTestDir(t *testing.T) string {
 func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 	t.Parallel()
 	testDir := prepareKeyTestDir(t)
+	defer test.CleanTestDir(t, testDir)
 
 	keys := GetAvailableKeys(testDir)
 
@@ -91,13 +93,12 @@ func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 			lengthOfFetchedKeys, lengthOfTestKeys,
 		)
 	}
-
-	test.CleanTestDir(t, testDir)
 }
 
 func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 	t.Parallel()
 	testDir := prepareKeyTestDir(t)
+	defer test.CleanTestDir(t, testDir)
 
 	keys := GetAvailableKeys(testDir)
 	wantedKeys := getTestKeys()
@@ -121,6 +122,4 @@ func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 			t.Fatalf("public key \"%s\" does not match with expected public key \"%s\"", key.PublicKey, wantedKey.PublicKey)
 		}
 	}
-
-	test.CleanTestDir(t, testDir)
 }
