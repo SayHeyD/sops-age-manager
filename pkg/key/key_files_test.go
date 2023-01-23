@@ -53,7 +53,6 @@ in order to execute tests in an isolated directory. The string returned is the a
 */
 func prepareKeyTestDir(t *testing.T) string {
 	testDir := test.GenerateNewUniqueTestDir(t)
-	defer test.CleanTestDir(t, testDir)
 
 	keys := getTestKeys()
 
