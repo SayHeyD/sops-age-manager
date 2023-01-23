@@ -1,7 +1,7 @@
 package key
 
 import (
-	"github.com/google/uuid"
+	"github.com/SayHeyD/sops-age-manager/test"
 	"os"
 	"testing"
 )
@@ -12,11 +12,6 @@ type TestKeyFiles struct {
 	FileContent string
 	PrivateKey  string
 	PublicKey   string
-}
-
-// getTestBaseDir returns the base path for creating test directories
-func getTestBaseDir() string {
-	return os.TempDir() + string(os.PathSeparator) + "sops-age-manager"
 }
 
 // getTestKeys returns age key values for testing. The returned keys are not real key pairs.
@@ -57,24 +52,7 @@ prepareKeyTestDir generates a temporary directory, with a unique name, where key
 in order to execute tests in an isolated directory. The string returned is the absolute filepath of the directory.
 */
 func prepareKeyTestDir(t *testing.T) string {
-	baseDir := getTestBaseDir()
-	testDir := baseDir + string(os.PathSeparator) + uuid.NewString()
-
-	if _, err := os.Stat(baseDir); os.IsNotExist(err) {
-		if err := os.Mkdir(baseDir, os.ModePerm); err != nil {
-			t.Fatalf("Could not create testing directories: %v", err)
-		}
-	} else if err != nil {
-		t.Fatalf("Could not check if testing directory exist: %v", err)
-	}
-
-	if _, err := os.Stat(testDir); os.IsNotExist(err) {
-		if err := os.Mkdir(testDir, os.ModePerm); err != nil {
-			t.Fatalf("Could not create testing directories: %v", err)
-		}
-	} else if err != nil {
-		t.Fatalf("Could not check if testing directory exist: %v", err)
-	}
+	testDir := test.GenerateNewUniqueTestDir(t)
 
 	keys := getTestKeys()
 
@@ -98,14 +76,6 @@ func prepareKeyTestDir(t *testing.T) string {
 	return testDir
 }
 
-// cleanTestDir removes the test directory and all contents of it.
-func cleanTestDir(t *testing.T, directory string) {
-	err := os.RemoveAll(directory)
-	if err != nil {
-		t.Fatalf("Could not delete test directory \"%s\": %v", directory, err)
-	}
-}
-
 func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 	t.Parallel()
 	testDir := prepareKeyTestDir(t)
@@ -122,7 +92,7 @@ func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 		)
 	}
 
-	cleanTestDir(t, testDir)
+	test.CleanTestDir(t, testDir)
 }
 
 func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
@@ -152,5 +122,5 @@ func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 		}
 	}
 
-	cleanTestDir(t, testDir)
+	test.CleanTestDir(t, testDir)
 }
