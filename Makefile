@@ -1,3 +1,5 @@
+.PHONY: test
+
 build:
 	@echo "Building application... 🔄"
 	@go build -o bin/sam . && echo "Finished building ✅" || (echo echo "Build failed ❌"; exit 1)
