@@ -166,7 +166,7 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 	}
 }
 
-func TestGetConfigDirPath(t *testing.T) {
+func TestGetConfigDirPathReturnsCorrectDirectory(t *testing.T) {
 	t.Parallel()
 
 	homeDir, err := os.UserHomeDir()
