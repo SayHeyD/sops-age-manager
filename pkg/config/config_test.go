@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+/* TODO: implement tests for new Raw() method and getConfigFileContents() helper function.
+* Refactor tests for NewConfigFromFile() accordingly.
+ */
+
 func getExpectedKeyName() string {
 	return "some_key_name"
 }
