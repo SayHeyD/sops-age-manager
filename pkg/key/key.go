@@ -1,7 +1,6 @@
 package key
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -48,6 +47,6 @@ func getPubKeyFromFileContents(contents string) string {
 func (k *Key) SetActive() {
 	err := os.Setenv("SOPS_AGE_KEY", k.PrivateKey)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Cannot set env SOPS_AGE_KEY: %v", err))
+		log.Fatalf("Cannot set env SOPS_AGE_KEY: %v", err)
 	}
 }

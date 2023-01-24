@@ -39,10 +39,10 @@ func setActiveKey(keyName string) {
 	for _, ageKey := range keys {
 		if ageKey.Name == keyName {
 			ageKey.SetActive()
-			fmt.Println(fmt.Sprintf("Set \"%s\" as active key", ageKey.Name))
+			fmt.Printf("Set \"%s\" as active key\n", ageKey.Name)
 			return
 		}
 	}
 
-	log.Fatal(fmt.Sprintf("No key with name \"%s\" found", keyName))
+	log.Fatalf("No key with name \"%s\" found", keyName)
 }

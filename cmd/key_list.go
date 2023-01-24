@@ -32,18 +32,18 @@ func listKeys() {
 	for _, ageKey := range keys {
 		fmt.Println()
 
-		fmt.Println(fmt.Sprintf("%s", ageKey.Name))
+		fmt.Printf("%s\n", ageKey.Name)
 
 		fmt.Println("║")
 
 		if listKeyWithFileName {
-			fmt.Println(fmt.Sprintf("╠═ File path: %s", ageKey.FileName))
+			fmt.Printf("╠═ File path: %s\n", ageKey.FileName)
 		}
 
 		if listKeyWithPrivateKeys {
-			fmt.Println(fmt.Sprintf("╠═ Private Key: %s", ageKey.PrivateKey))
+			fmt.Printf("╠═ Private Key: %s\n", ageKey.PrivateKey)
 		}
 
-		fmt.Println(fmt.Sprintf("╚═ Public Key: %s", ageKey.PublicKey))
+		fmt.Printf("╚═ Public Key: %s\n", ageKey.PublicKey)
 	}
 }
