@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
+	"github.com/SayHeyD/sops-age-manager/pkg/key"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
+	"os/exec"
 )
 
 var (
@@ -41,10 +45,40 @@ func executeSops(args []string) {
 		log.Fatalf("execute sops: %v", err)
 	}
 
-	fmt.Printf("Args: %s\nKeyName: %s\n", args, appConfig.KeyName)
-	//out, err := exec.Command("sops", args...).Output()
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(string(out))
+	var wantedKey *key.Key
+	keys := key.GetAvailableKeys("")
+	for _, foundKey := range keys {
+		if appConfig.KeyName == foundKey.Name {
+			wantedKey = foundKey
+			break
+		}
+	}
+
+	if wantedKey == nil {
+		log.Fatalf("Could not find key \"%s\"", appConfig.KeyName)
+	}
+
+	args = append([]string{"--age", wantedKey.PublicKey}, args...)
+	err = os.Setenv("SOPS_AGE_KEY", wantedKey.PrivateKey)
+	if err != nil {
+		log.Fatalf("could not set env variable: %v", err)
+	}
+
+	fmt.Printf("sops %s\n", args)
+
+	var sopsOut bytes.Buffer
+	var stderr bytes.Buffer
+
+	sopsCmd := exec.Command("sops", args...)
+
+	sopsCmd.Stdout = &sopsOut
+	sopsCmd.Stderr = &stderr
+
+	err = sopsCmd.Run()
+	if err != nil {
+		fmt.Printf("sops error: %v: %s", err, stderr.String())
+		return
+	}
+
+	fmt.Print(sopsOut.String())
 }
