@@ -31,9 +31,9 @@ func TestNewConfigFromFileShouldReturnANonNilValue(t *testing.T) {
 	t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
-	defer test.CleanTestDir(t, testDir)
+	defer testDir.CleanTestDir(t)
 
-	testConfigFilePath := testDir + string(os.PathSeparator) + "config.yaml"
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
 	var config *Config
 
@@ -51,9 +51,9 @@ func TestNewConfigFromFileShouldCreateAFileIfNotExist(t *testing.T) {
 	t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
-	defer test.CleanTestDir(t, testDir)
+	defer testDir.CleanTestDir(t)
 
-	testConfigFilePath := testDir + string(os.PathSeparator) + "config.yaml"
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
 	_, err := NewConfigFromFile(testConfigFilePath)
 	if err != nil {
@@ -69,10 +69,11 @@ func TestNewConfigFromFileShouldNotCreateNewFileIfOneAlreadyExists(t *testing.T)
 	t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
-	defer test.CleanTestDir(t, testDir)
+	defer testDir.CleanTestDir(t)
+
 	expectedFileContent := getExpectedFileContent()
 
-	testConfigFilePath := testDir + string(os.PathSeparator) + "config.yaml"
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
 	configFile, err := os.Create(testConfigFilePath)
 	if err != nil {
@@ -104,11 +105,11 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 	t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
-	defer test.CleanTestDir(t, testDir)
+	defer testDir.CleanTestDir(t)
 	expectedKeyName := getExpectedKeyName()
 	expectedFileContent := getExpectedFileContent()
 
-	testConfigFilePath := testDir + string(os.PathSeparator) + "config.yaml"
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
 	configFile, err := os.Create(testConfigFilePath)
 	if err != nil {
@@ -139,11 +140,11 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 	t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
-	defer test.CleanTestDir(t, testDir)
+	defer testDir.CleanTestDir(t)
 	expectedKeyName := getExpectedKeyName()
 	expectedFileContent := getExpectedFileContent()
 
-	configFilePath := testDir + string(os.PathSeparator) + "config.yaml"
+	configFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
 	if err := NewConfig(expectedKeyName).Write(configFilePath); err != nil {
 		t.Fatalf("could not write config file \"%s\": %v", configFilePath, err)

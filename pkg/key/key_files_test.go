@@ -51,13 +51,13 @@ AGE-SECRET-KEY-HFANZUT5LT3K8ZRFZFHS36XWKCVDKEKJ2M7WKQN3MFYUGIP4WWM7DT1CGV3`,
 prepareKeyTestDir generates a temporary directory, with a unique name, where key files will be written to
 in order to execute tests in an isolated directory. The string returned is the absolute filepath of the directory.
 */
-func prepareKeyTestDir(t *testing.T) string {
+func prepareKeyTestDir(t *testing.T) *test.Dir {
 	testDir := test.GenerateNewUniqueTestDir(t)
 
 	keys := getTestKeys()
 
 	for _, key := range keys {
-		filePath := testDir + string(os.PathSeparator) + key.FileName
+		filePath := testDir.Path + string(os.PathSeparator) + key.FileName
 
 		keyFile, err := os.Create(filePath)
 		if err != nil {
@@ -79,9 +79,9 @@ func prepareKeyTestDir(t *testing.T) string {
 func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 	t.Parallel()
 	testDir := prepareKeyTestDir(t)
-	defer test.CleanTestDir(t, testDir)
+	defer testDir.CleanTestDir(t)
 
-	keys := GetAvailableKeys(testDir)
+	keys := GetAvailableKeys(testDir.Path)
 
 	lengthOfFetchedKeys := len(keys)
 	lengthOfTestKeys := len(getTestKeys())
@@ -97,9 +97,9 @@ func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 	t.Parallel()
 	testDir := prepareKeyTestDir(t)
-	defer test.CleanTestDir(t, testDir)
+	defer testDir.CleanTestDir(t)
 
-	keys := GetAvailableKeys(testDir)
+	keys := GetAvailableKeys(testDir.Path)
 	wantedKeys := getTestKeys()
 
 	for i, key := range keys {
