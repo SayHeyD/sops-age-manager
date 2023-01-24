@@ -20,37 +20,9 @@ func NewConfig(keyName string) *Config {
 }
 
 func NewConfigFromFile(path string) (*Config, error) {
-
-	configDir, err := getConfigDirPath()
+	contentBytes, err := getConfigFileContents(path)
 	if err != nil {
-		return nil, fmt.Errorf("trying to read config dir: %v", err)
-	}
-	configFilePath := configDir + string(os.PathSeparator) + "config.yaml"
-
-	if path != "" {
-		configFilePath = path
-	}
-
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		configFile, err := os.Create(configFilePath)
-		if err != nil {
-			return nil, fmt.Errorf("trying to create the config file: %v", err)
-		}
-		defer configFile.Close()
-
-		_, err = configFile.WriteString(defaultConfig)
-		if err != nil {
-			return nil, fmt.Errorf("trying write to the config file: %v", err)
-		}
-
-		return &Config{
-			KeyName: "",
-		}, nil
-	}
-
-	contentBytes, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("trying to read the config file: %v", err)
+		return nil, fmt.Errorf("trying generate a new config from a file: %v", err)
 	}
 
 	config := &Config{}
@@ -59,6 +31,15 @@ func NewConfigFromFile(path string) (*Config, error) {
 	}
 
 	return config, nil
+}
+
+func (c *Config) Raw(path string) (string, error) {
+	contentBytes, err := getConfigFileContents(path)
+	if err != nil {
+		return "", fmt.Errorf("trying to dump raw config file: %v", err)
+	}
+
+	return string(contentBytes), nil
 }
 
 func (c *Config) Write(path string) error {
@@ -108,4 +89,38 @@ func getConfigDirPath() (string, error) {
 	}
 
 	return samConfigDir, nil
+}
+
+func getConfigFileContents(path string) ([]byte, error) {
+	configDir, err := getConfigDirPath()
+	if err != nil {
+		return nil, fmt.Errorf("trying to read config dir: %v", err)
+	}
+	configFilePath := configDir + string(os.PathSeparator) + "config.yaml"
+
+	if path != "" {
+		configFilePath = path
+	}
+
+	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
+		configFile, err := os.Create(configFilePath)
+		if err != nil {
+			return nil, fmt.Errorf("trying to create the config file: %v", err)
+		}
+		defer configFile.Close()
+
+		_, err = configFile.WriteString(defaultConfig)
+		if err != nil {
+			return nil, fmt.Errorf("trying write to the config file: %v", err)
+		}
+
+		return []byte(defaultConfig), nil
+	}
+
+	contentBytes, err := os.ReadFile(configFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("trying to read the config file: %v", err)
+	}
+
+	return contentBytes, nil
 }
