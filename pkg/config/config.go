@@ -7,15 +7,18 @@ import (
 	"strings"
 )
 
-const defaultConfig = `key: ""`
+const defaultConfig = `key: ""
+key-dir: ""`
 
 type Config struct {
 	KeyName string `yaml:"key"`
+	KeyDir  string `yaml:"key-dir"`
 }
 
-func NewConfig(keyName string) *Config {
+func NewConfig(keyName string, keyDir string) *Config {
 	return &Config{
 		KeyName: keyName,
+		KeyDir:  keyDir,
 	}
 }
 
