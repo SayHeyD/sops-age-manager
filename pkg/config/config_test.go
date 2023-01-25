@@ -4,30 +4,39 @@ import (
 	"fmt"
 	"github.com/SayHeyD/sops-age-manager/test"
 	"os"
+	"strings"
 	"testing"
 )
-
-/* TODO: implement tests for new Raw() method and getConfigFileContents() helper function.
-* Refactor tests for NewConfigFromFile() accordingly.
- */
 
 func getExpectedKeyName() string {
 	return "some_key_name"
 }
 
+func getExpectedKeyDir() string {
+	tempDir := os.TempDir() + string(os.PathSeparator) + "some-config.yaml"
+	return tempDir
+}
+
 func getExpectedFileContent() string {
-	return fmt.Sprintf("key: %s", getExpectedKeyName())
+	defaultConfigTemplateString := `key: %s
+key-dir: %s`
+	return fmt.Sprintf(defaultConfigTemplateString, getExpectedKeyName(), getExpectedKeyDir())
 }
 
 func TestNewConfig(t *testing.T) {
 	t.Parallel()
 
 	expectedKeyName := getExpectedKeyName()
+	expectedKeyDir := getExpectedKeyDir()
 
-	config := NewConfig(expectedKeyName)
+	config := NewConfig(expectedKeyName, expectedKeyDir)
 
 	if config.KeyName != expectedKeyName {
 		t.Fatalf("The KeyName \"%s\" did not match the expected value \"%s\"", config.KeyName, expectedKeyName)
+	}
+
+	if config.KeyDir != expectedKeyDir {
+		t.Fatalf("The KeyDir \"%s\" did not match the expected value \"%s\"", config.KeyDir, expectedKeyDir)
 	}
 }
 
@@ -51,66 +60,13 @@ func TestNewConfigFromFileShouldReturnANonNilValue(t *testing.T) {
 	}
 }
 
-func TestNewConfigFromFileShouldCreateAFileIfNotExist(t *testing.T) {
-	t.Parallel()
-
-	testDir := test.GenerateNewUniqueTestDir(t)
-	defer testDir.CleanTestDir(t)
-
-	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
-
-	_, err := NewConfigFromFile(testConfigFilePath)
-	if err != nil {
-		t.Fatalf("Error creating config from file: %v", err)
-	}
-
-	if _, err := os.Stat(testConfigFilePath); os.IsNotExist(err) {
-		t.Fatalf("File does not exist after NewConfigFromFile() is called")
-	}
-}
-
-func TestNewConfigFromFileShouldNotCreateNewFileIfOneAlreadyExists(t *testing.T) {
-	t.Parallel()
-
-	testDir := test.GenerateNewUniqueTestDir(t)
-	defer testDir.CleanTestDir(t)
-
-	expectedFileContent := getExpectedFileContent()
-
-	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
-
-	configFile, err := os.Create(testConfigFilePath)
-	if err != nil {
-		t.Fatalf("Error creating config for testing: %v", err)
-	}
-
-	if _, err = configFile.WriteString(expectedFileContent); err != nil {
-		t.Fatalf("Error writing to config for testing: %v", err)
-	}
-
-	if err = configFile.Close(); err != nil {
-		t.Fatalf("Error closing the config for testing: %v", err)
-	}
-
-	_, err = NewConfigFromFile(testConfigFilePath)
-	if err != nil {
-		t.Fatalf("Error creating config from file: %v", err)
-	}
-
-	fileContent, err := os.ReadFile(testConfigFilePath)
-	fileContentString := string(fileContent)
-
-	if fileContentString != expectedFileContent {
-		t.Fatalf("The file content \"%s\" differs from whats expected \"%s\"", fileContentString, expectedFileContent)
-	}
-}
-
 func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) {
 	t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
 	expectedKeyName := getExpectedKeyName()
+	expectedKeyDir := getExpectedKeyDir()
 	expectedFileContent := getExpectedFileContent()
 
 	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
@@ -138,6 +94,10 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 	if config.KeyName != expectedKeyName {
 		t.Fatalf("The key name \"%s\" differs from whats expected \"%s\"", config.KeyName, expectedKeyName)
 	}
+
+	if config.KeyDir != expectedKeyDir {
+		t.Fatalf("The key dir \"%s\" differs from whats expected \"%s\"", config.KeyDir, expectedKeyDir)
+	}
 }
 
 func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
@@ -146,11 +106,12 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
 	expectedKeyName := getExpectedKeyName()
+	expectedKeyDir := getExpectedKeyDir()
 	expectedFileContent := getExpectedFileContent()
 
 	configFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
-	if err := NewConfig(expectedKeyName).Write(configFilePath); err != nil {
+	if err := NewConfig(expectedKeyName, expectedKeyDir).Write(configFilePath); err != nil {
 		t.Fatalf("could not write config file \"%s\": %v", configFilePath, err)
 	}
 
@@ -183,5 +144,171 @@ func TestGetConfigDirPathReturnsCorrectDirectory(t *testing.T) {
 
 	if configDir != expectedConfigDir {
 		t.Fatalf("The path returned by getConfigDirPath() \"%s\" did not match the expected value \"%s\"", configDir, expectedConfigDir)
+	}
+}
+
+func TestGetConfigFileContentsShouldReturnTheDefaultConfigIfNoFileExists(t *testing.T) {
+	t.Parallel()
+
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+
+	fileContent, err := getConfigFileContents(testConfigFilePath)
+	fileContentString := strings.Trim(string(fileContent), "\n\t ")
+	if err != nil {
+		t.Fatalf("Error creating config from file: %v", err)
+	}
+
+	if fileContentString != defaultConfig {
+		t.Fatalf("The file content \"%s\" does not match with the expected value \"%s\"", fileContentString, defaultConfig)
+	}
+}
+
+func TestGetConfigFileContentsShouldCreateAFileIfNotExist(t *testing.T) {
+	t.Parallel()
+
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+
+	_, err := getConfigFileContents(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error creating config from file: %v", err)
+	}
+
+	if _, err := os.Stat(testConfigFilePath); os.IsNotExist(err) {
+		t.Fatalf("File does not exist after getConfigFileContents() is called")
+	}
+}
+
+func TestGetConfigFileContentsShouldNotCreateNewFileIfOneAlreadyExists(t *testing.T) {
+	t.Parallel()
+
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	expectedFileContent := getExpectedFileContent()
+
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+
+	configFile, err := os.Create(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error creating config for testing: %v", err)
+	}
+
+	if _, err = configFile.WriteString(expectedFileContent); err != nil {
+		t.Fatalf("Error writing to config for testing: %v", err)
+	}
+
+	if err = configFile.Close(); err != nil {
+		t.Fatalf("Error closing the config for testing: %v", err)
+	}
+
+	_, err = getConfigFileContents(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error reading config from file: %v", err)
+	}
+
+	fileContent, err := os.ReadFile(testConfigFilePath)
+	fileContentString := string(fileContent)
+
+	if fileContentString != expectedFileContent {
+		t.Fatalf("The file content \"%s\" differs from whats expected \"%s\"", fileContentString, expectedFileContent)
+	}
+}
+
+func TestGetConfigFileContentsShouldReturnAExpectedFileContents(t *testing.T) {
+	t.Parallel()
+
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+	expectedFileContent := getExpectedFileContent()
+
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+
+	configFile, err := os.Create(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error creating config for testing: %v", err)
+	}
+
+	if _, err = configFile.WriteString(expectedFileContent); err != nil {
+		t.Fatalf("Error writing to config for testing: %v", err)
+	}
+
+	if err = configFile.Close(); err != nil {
+		t.Fatalf("Error closing the config for testing: %v", err)
+	}
+
+	configContent, err := getConfigFileContents(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error getting config from file: %v", err)
+	}
+
+	if string(configContent) != expectedFileContent {
+		t.Fatalf("The fetched content \"%s\" differs from whats expected \"%s\"",
+			string(configContent), expectedFileContent)
+	}
+}
+
+func TestRawShouldReturnANonEmptyString(t *testing.T) {
+	t.Parallel()
+
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+
+	var config *Config
+
+	config, err := NewConfigFromFile(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error creating config from file: %v", err)
+	}
+
+	configContent, err := config.Raw(testConfigFilePath)
+
+	if configContent == "" {
+		t.Fatalf("Returned string is empty")
+	}
+}
+
+func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
+	t.Parallel()
+
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	expectedFileContent := getExpectedFileContent()
+
+	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+
+	configFile, err := os.Create(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error creating config for testing: %v", err)
+	}
+
+	if _, err = configFile.WriteString(expectedFileContent); err != nil {
+		t.Fatalf("Error writing to config for testing: %v", err)
+	}
+
+	if err = configFile.Close(); err != nil {
+		t.Fatalf("Error closing the config for testing: %v", err)
+	}
+
+	var config *Config
+
+	config, err = NewConfigFromFile(testConfigFilePath)
+
+	configContent, err := config.Raw(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Could not get the content of the config: %v", err)
+	}
+
+	if configContent != expectedFileContent {
+
+		t.Fatalf("raw config content \"%s\" does not match with the expected config \"%s\"", configContent, expectedFileContent)
 	}
 }
