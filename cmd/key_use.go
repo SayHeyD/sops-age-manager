@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	doNotSetEncryptionKey bool
-	doNotSetDecryptionKey bool
+	setEncryptionKey bool
+	setDecryptionKey bool
 
 	useKeyCommand = &cobra.Command{
 		Use:   "use",
@@ -37,8 +37,8 @@ Flags:
   -h, --help         help for key
 `
 
-	useKeyCommand.PersistentFlags().BoolVarP(&doNotSetDecryptionKey, "encryption", "e", false, "")
-	useKeyCommand.PersistentFlags().BoolVarP(&doNotSetEncryptionKey, "decryption", "d", false, "")
+	useKeyCommand.PersistentFlags().BoolVarP(&setEncryptionKey, "encryption", "e", false, "")
+	useKeyCommand.PersistentFlags().BoolVarP(&setDecryptionKey, "decryption", "d", false, "")
 
 	useKeyCommand.SetUsageTemplate(usage)
 }
@@ -46,13 +46,27 @@ Flags:
 func setActiveKey(keyName string) {
 	keys := key.GetAvailableKeys("")
 
-	for _, ageKey := range keys {
-		if ageKey.Name == keyName {
-			ageKey.SetActive()
-			fmt.Printf("Set \"%s\" as active key\n", ageKey.Name)
-			return
+	if setDecryptionKey || (!setDecryptionKey && !setEncryptionKey) {
+		for _, ageKey := range keys {
+			if ageKey.Name == keyName {
+				ageKey.SetActiveDecryption()
+				fmt.Printf("Set \"%s\" as active decryption key\n", ageKey.Name)
+				return
+			}
 		}
+
+		log.Fatalf("No key with name \"%s\" found", keyName)
 	}
 
-	log.Fatalf("No key with name \"%s\" found", keyName)
+	if setEncryptionKey || (!setDecryptionKey && !setEncryptionKey) {
+		for _, ageKey := range keys {
+			if ageKey.Name == keyName {
+				ageKey.SetActiveEncryption()
+				fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
+				return
+			}
+		}
+
+		log.Fatalf("No key with name \"%s\" found", keyName)
+	}
 }
