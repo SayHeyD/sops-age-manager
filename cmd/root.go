@@ -45,24 +45,38 @@ func executeSops(args []string) {
 		log.Fatalf("execute sops: %v", err)
 	}
 
-	var wantedKey *key.Key
+	var wantedEncryptionKey *key.Key
 	keys := key.GetAvailableKeys("")
 	for _, foundKey := range keys {
-		if appConfig.KeyName == foundKey.Name {
-			wantedKey = foundKey
+		if appConfig.EncryptionKeyName == foundKey.Name {
+			wantedEncryptionKey = foundKey
 			break
 		}
 	}
 
-	if wantedKey == nil {
-		log.Fatalf("Could not find key \"%s\"", appConfig.KeyName)
+	if wantedEncryptionKey == nil {
+		log.Fatalf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
 	}
 
-	args = append([]string{"--age", wantedKey.PublicKey}, args...)
-	err = os.Setenv("SOPS_AGE_KEY", wantedKey.PrivateKey)
+	err = os.Setenv("SOPS_AGE_KEY", wantedEncryptionKey.PrivateKey)
 	if err != nil {
 		log.Fatalf("could not set env variable: %v", err)
 	}
+
+	var wantedDecryptionKey *key.Key
+	keys = key.GetAvailableKeys("")
+	for _, foundKey := range keys {
+		if appConfig.DecryptionKeyName == foundKey.Name {
+			wantedEncryptionKey = foundKey
+			break
+		}
+	}
+
+	if wantedDecryptionKey == nil {
+		log.Fatalf("Could not find encryption key \"%s\"", appConfig.DecryptionKeyName)
+	}
+
+	args = append([]string{"--age", wantedDecryptionKey.PublicKey}, args...)
 
 	fmt.Printf("sops %s\n", args)
 
