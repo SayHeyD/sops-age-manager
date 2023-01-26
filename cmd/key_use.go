@@ -51,11 +51,10 @@ func setActiveKey(keyName string) {
 			if ageKey.Name == keyName {
 				ageKey.SetActiveDecryption()
 				fmt.Printf("Set \"%s\" as active decryption key\n", ageKey.Name)
-				return
+			} else {
+				log.Fatalf("No key with name \"%s\" found", keyName)
 			}
 		}
-
-		log.Fatalf("No key with name \"%s\" found", keyName)
 	}
 
 	if setEncryptionKey || (!setDecryptionKey && !setEncryptionKey) {
@@ -63,10 +62,9 @@ func setActiveKey(keyName string) {
 			if ageKey.Name == keyName {
 				ageKey.SetActiveEncryption()
 				fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
-				return
+			} else {
+				log.Fatalf("No key with name \"%s\" found", keyName)
 			}
 		}
-
-		log.Fatalf("No key with name \"%s\" found", keyName)
 	}
 }
