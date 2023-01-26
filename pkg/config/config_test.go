@@ -8,8 +8,12 @@ import (
 	"testing"
 )
 
-func getExpectedKeyName() string {
+func getExpectedDecryptionKeyName() string {
 	return "some_key_name"
+}
+
+func getExpectedEncryptionKeyName() string {
+	return "some_other_key_name"
 }
 
 func getExpectedKeyDir() string {
@@ -18,21 +22,28 @@ func getExpectedKeyDir() string {
 }
 
 func getExpectedFileContent() string {
-	defaultConfigTemplateString := `key: %s
+	defaultConfigTemplateString := `encryption-key: %s
+decryption-key: %s
 key-dir: %s`
-	return fmt.Sprintf(defaultConfigTemplateString, getExpectedKeyName(), getExpectedKeyDir())
+	return fmt.Sprintf(defaultConfigTemplateString, getExpectedEncryptionKeyName(),
+		getExpectedDecryptionKeyName(), getExpectedKeyDir())
 }
 
 func TestNewConfig(t *testing.T) {
 	t.Parallel()
 
-	expectedKeyName := getExpectedKeyName()
+	expectedEncryptionKeyName := getExpectedEncryptionKeyName()
+	expectedDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
 
-	config := NewConfig(expectedKeyName, expectedKeyDir)
+	config := NewConfig(expectedEncryptionKeyName, expectedDecryptionKeyName, expectedKeyDir)
 
-	if config.KeyName != expectedKeyName {
-		t.Fatalf("The KeyName \"%s\" did not match the expected value \"%s\"", config.KeyName, expectedKeyName)
+	if config.EncryptionKeyName != expectedEncryptionKeyName {
+		t.Fatalf("The EncryptionKeyName \"%s\" did not match the expected value \"%s\"", config.EncryptionKeyName, expectedEncryptionKeyName)
+	}
+
+	if config.DecryptionKeyName != expectedDecryptionKeyName {
+		t.Fatalf("The DecryptionKeyName \"%s\" did not match the expected value \"%s\"", config.DecryptionKeyName, expectedDecryptionKeyName)
 	}
 
 	if config.KeyDir != expectedKeyDir {
@@ -65,7 +76,8 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
-	expectedKeyName := getExpectedKeyName()
+	expectedEnryptionKeyName := getExpectedEncryptionKeyName()
+	expectedDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
 	expectedFileContent := getExpectedFileContent()
 
@@ -91,8 +103,12 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 		t.Fatalf("Error creating config from file: %v", err)
 	}
 
-	if config.KeyName != expectedKeyName {
-		t.Fatalf("The key name \"%s\" differs from whats expected \"%s\"", config.KeyName, expectedKeyName)
+	if config.EncryptionKeyName != expectedEnryptionKeyName {
+		t.Fatalf("The encryption key name \"%s\" differs from whats expected \"%s\"", config.EncryptionKeyName, expectedEnryptionKeyName)
+	}
+
+	if config.DecryptionKeyName != expectedDecryptionKeyName {
+		t.Fatalf("The decryption key name \"%s\" differs from whats expected \"%s\"", config.DecryptionKeyName, expectedEnryptionKeyName)
 	}
 
 	if config.KeyDir != expectedKeyDir {
@@ -105,13 +121,15 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
-	expectedKeyName := getExpectedKeyName()
+
+	expectedEncryptionKeyName := getExpectedEncryptionKeyName()
+	expecteDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
 	expectedFileContent := getExpectedFileContent()
 
 	configFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
-	if err := NewConfig(expectedKeyName, expectedKeyDir).Write(configFilePath); err != nil {
+	if err := NewConfig(expectedEncryptionKeyName, expecteDecryptionKeyName, expectedKeyDir).Write(configFilePath); err != nil {
 		t.Fatalf("could not write config file \"%s\": %v", configFilePath, err)
 	}
 
