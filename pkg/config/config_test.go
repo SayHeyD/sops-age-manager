@@ -127,11 +127,11 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 	expectedKeyDir := getExpectedKeyDir()
 	expectedFileContent := getExpectedFileContent()
 
-	configFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
-
-	if err := NewConfig(expectedEncryptionKeyName, expecteDecryptionKeyName, expectedKeyDir).Write(configFilePath); err != nil {
-		t.Fatalf("could not write config file \"%s\": %v", configFilePath, err)
+	if err := NewConfig(expectedEncryptionKeyName, expecteDecryptionKeyName, expectedKeyDir).Write(testDir.Path); err != nil {
+		t.Fatalf("could not write config file in folder \"%s\": %v", testDir.Path, err)
 	}
+
+	configFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
 	configFileContentBytes, err := os.ReadFile(configFilePath)
 	if err != nil {
