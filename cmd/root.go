@@ -55,7 +55,7 @@ func executeSops(args []string) {
 	}
 
 	if wantedEncryptionKey == nil {
-		log.Fatalf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
+		log.Printf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
 	}
 
 	err = os.Setenv("SOPS_AGE_KEY", wantedEncryptionKey.PrivateKey)
@@ -73,7 +73,7 @@ func executeSops(args []string) {
 	}
 
 	if wantedDecryptionKey == nil {
-		log.Fatalf("Could not find encryption key \"%s\"", appConfig.DecryptionKeyName)
+		log.Printf("Could not find encryption key \"%s\"", appConfig.DecryptionKeyName)
 	}
 
 	args = append([]string{"--age", wantedDecryptionKey.PublicKey}, args...)
