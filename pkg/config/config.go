@@ -59,7 +59,7 @@ func (c *Config) Write(path string) error {
 		configPath = path
 	}
 
-	configFile, err := os.Create(configPath)
+	configFile, err := os.Create(configPath + string(os.PathSeparator) + "config.yaml")
 	if err != nil {
 		return fmt.Errorf("could not create the config file: %v", err)
 	}
