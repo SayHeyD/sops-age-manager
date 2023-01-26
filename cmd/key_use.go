@@ -46,25 +46,21 @@ Flags:
 func setActiveKey(keyName string) {
 	keys := key.GetAvailableKeys("")
 
-	if setDecryptionKey || (!setDecryptionKey && !setEncryptionKey) {
-		for _, ageKey := range keys {
-			if ageKey.Name == keyName {
+	for _, ageKey := range keys {
+		if ageKey.Name == keyName {
+			if setDecryptionKey || (!setDecryptionKey && !setEncryptionKey) {
 				ageKey.SetActiveDecryption()
 				fmt.Printf("Set \"%s\" as active decryption key\n", ageKey.Name)
-			} else {
-				log.Fatalf("No key with name \"%s\" found", keyName)
 			}
+
+			if setEncryptionKey || (!setDecryptionKey && !setEncryptionKey) {
+				ageKey.SetActiveEncryption()
+				fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
+			}
+
+			return
 		}
 	}
 
-	if setEncryptionKey || (!setDecryptionKey && !setEncryptionKey) {
-		for _, ageKey := range keys {
-			if ageKey.Name == keyName {
-				ageKey.SetActiveEncryption()
-				fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
-			} else {
-				log.Fatalf("No key with name \"%s\" found", keyName)
-			}
-		}
-	}
+	log.Fatalf("No key with name \"%s\" found", keyName)
 }
