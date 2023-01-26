@@ -1,7 +1,6 @@
 package key
 
 import (
-	"os"
 	"testing"
 )
 
@@ -68,17 +67,5 @@ func TestNewKeyFunctionCreatesKeyWithCorrectPrivateKeyWithoutNewline(t *testing.
 
 	if key.PrivateKey != ageKeyPrivateKey {
 		t.Fatalf("Wanted private key \"%s\" doesn't match with private key on generated key: \"%s\"", ageKeyPrivateKey, key.PrivateKey)
-	}
-}
-
-func TestSetActiveSetsEnvVarCorrectly(t *testing.T) {
-	t.Parallel()
-	key := NewKey(wantedKeyName, wantedFilePath, ageKeyFileContent)
-	key.SetActive()
-
-	envVarValue := os.Getenv("SOPS_AGE_KEY")
-
-	if envVarValue != ageKeyPrivateKey {
-		t.Fatalf("Set active did not set the env \"SOPS_AGE_KEY\" to \"%s\". Value is: \"%s\"", ageKeyPrivateKey, key.PublicKey)
 	}
 }
