@@ -231,6 +231,10 @@ func TestGetConfigFileContentsShouldNotCreateNewFileIfOneAlreadyExists(t *testin
 	}
 
 	fileContent, err := os.ReadFile(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Could not read the test config file: %v", err)
+	}
+
 	fileContentString := string(fileContent)
 
 	if fileContentString != expectedFileContent {
