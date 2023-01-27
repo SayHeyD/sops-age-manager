@@ -287,6 +287,9 @@ func TestRawShouldReturnANonEmptyString(t *testing.T) {
 	}
 
 	configContent, err := config.Raw(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Could not get the config from a file: %v", err)
+	}
 
 	if configContent == "" {
 		t.Fatalf("Returned string is empty")
