@@ -319,6 +319,9 @@ func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
 	var config *Config
 
 	config, err = NewConfigFromFile(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Could not get the config from a file: %v", err)
+	}
 
 	configContent, err := config.Raw(testConfigFilePath)
 	if err != nil {
