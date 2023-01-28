@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
@@ -9,9 +10,15 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 )
 
 var (
+	//go:embed version.txt
+	versionFile embed.FS
+
+	showVersion bool
+
 	rootCmd = &cobra.Command{
 		Use:   "sam",
 		Short: "Sops-Age-Manager (SAM) is a tool for managing multiple age keys when using mozilla/sops",
@@ -35,11 +42,20 @@ func Execute() {
 func init() {
 	cobra.OnInitialize()
 
+	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Shows the current version of sam")
+
 	rootCmd.AddCommand(keyCommands)
 	rootCmd.AddCommand(configCommands)
 }
 
 func executeSops(args []string) {
+	if showVersion {
+		version, _ := versionFile.ReadFile("version.txt")
+
+		fmt.Printf("sam version: %s %s\n", string(version), runtime.Version())
+		return
+	}
+
 	appConfig, err := config.NewConfigFromFile("")
 	if err != nil {
 		log.Fatalf("execute sops: %v", err)
@@ -74,8 +90,6 @@ func executeSops(args []string) {
 	} else {
 		args = append([]string{"--age", wantedDecryptionKey.PublicKey}, args...)
 	}
-
-	fmt.Printf("sops %s\n", args)
 
 	var sopsOut bytes.Buffer
 	var stderr bytes.Buffer
