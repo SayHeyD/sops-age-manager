@@ -8,6 +8,7 @@ import (
 // getTestBaseDir returns the base path for creating test directories and
 // creates the base directory if it does not exist
 func getTestBaseDir(t *testing.T) string {
+	t.Helper()
 	dir := os.TempDir() + string(os.PathSeparator) + "sops-age-manager"
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {

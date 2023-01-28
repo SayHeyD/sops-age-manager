@@ -12,6 +12,7 @@ type Dir struct {
 
 // GenerateNewUniqueTestDir creates and returns an empty directory for testing whatever you'd like
 func GenerateNewUniqueTestDir(t *testing.T) *Dir {
+	t.Helper()
 	testDir := getTestBaseDir(t) + string(os.PathSeparator) + uuid.NewString()
 
 	if _, err := os.Stat(testDir); os.IsNotExist(err) {
@@ -29,6 +30,7 @@ func GenerateNewUniqueTestDir(t *testing.T) *Dir {
 
 // CleanTestDir removes the test directory and all contents of it.
 func (d *Dir) CleanTestDir(t *testing.T) {
+	t.Helper()
 	err := os.RemoveAll(d.Path)
 	if err != nil {
 		t.Fatalf("Could not delete test directory \"%s\": %v", d.Path, err)
