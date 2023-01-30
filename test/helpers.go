@@ -9,7 +9,13 @@ import (
 // creates the base directory if it does not exist
 func getTestBaseDir(t *testing.T) string {
 	t.Helper()
-	dir := os.TempDir() + "sops-age-manager"
+	tmpDir := os.TempDir()
+
+	if tmpDir[len(tmpDir)-1:] == string(os.PathSeparator) {
+		tmpDir = tmpDir[:len(tmpDir)-1]
+	}
+
+	dir := tmpDir + string(os.PathSeparator) + "sops-age-manager"
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.Mkdir(dir, os.ModePerm); err != nil {
