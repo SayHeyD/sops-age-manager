@@ -19,12 +19,12 @@ var (
 )
 
 func dumpConfig() {
-	appConfig, err := config.NewConfigFromFile("")
+	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
 		log.Fatalf("dump config: %v", err)
 	}
 
-	rawConfig, err := appConfig.Raw("")
+	rawConfig, err := appConfig.Raw()
 	if err != nil {
 		log.Fatalf("dump raw config: %v", err)
 	}

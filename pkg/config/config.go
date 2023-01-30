@@ -21,7 +21,7 @@ type Config struct {
 	KeyDir            string `yaml:"key-dir"`
 }
 
-func GetConfigFilePath() string {
+func getConfigFilePath() string {
 	return os.Getenv(configFileEnv)
 }
 
@@ -33,8 +33,8 @@ func NewConfig(encryptionKeyName string, decryptionKeyName string, keyDir string
 	}
 }
 
-func NewConfigFromFile(path string) (*Config, error) {
-	contentBytes, err := getConfigFileContents(path)
+func NewConfigFromFile() (*Config, error) {
+	contentBytes, err := getConfigFileContents(getConfigFilePath())
 	if err != nil {
 		return nil, fmt.Errorf("trying generate a new config from a file: %v", err)
 	}
@@ -47,8 +47,8 @@ func NewConfigFromFile(path string) (*Config, error) {
 	return config, nil
 }
 
-func (c *Config) Raw(path string) (string, error) {
-	contentBytes, err := getConfigFileContents(path)
+func (c *Config) Raw() (string, error) {
+	contentBytes, err := getConfigFileContents(getConfigFilePath())
 	if err != nil {
 		return "", fmt.Errorf("trying to dump raw config file: %v", err)
 	}
@@ -56,18 +56,8 @@ func (c *Config) Raw(path string) (string, error) {
 	return string(contentBytes), nil
 }
 
-func (c *Config) Write(path string) error {
-
-	configPath, err := getConfigDirPath()
-	if err != nil {
-		return fmt.Errorf("could not get config dir path: %v", err)
-	}
-
-	if path != "" {
-		configPath = path
-	}
-
-	configFile, err := os.Create(configPath + string(os.PathSeparator) + "config.yaml")
+func (c *Config) Write() error {
+	configFile, err := os.Create(getConfigFilePath())
 	if err != nil {
 		return fmt.Errorf("could not create the config file: %v", err)
 	}
@@ -106,18 +96,8 @@ func getConfigDirPath() (string, error) {
 }
 
 func getConfigFileContents(path string) ([]byte, error) {
-	configDir, err := getConfigDirPath()
-	if err != nil {
-		return nil, fmt.Errorf("trying to read config dir: %v", err)
-	}
-	configFilePath := configDir + string(os.PathSeparator) + "config.yaml"
-
-	if path != "" {
-		configFilePath = path
-	}
-
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		configFile, err := os.Create(configFilePath)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		configFile, err := os.Create(path)
 		if err != nil {
 			return nil, fmt.Errorf("trying to create the config file: %v", err)
 		}
@@ -131,7 +111,7 @@ func getConfigFileContents(path string) ([]byte, error) {
 		return []byte(defaultConfig), nil
 	}
 
-	contentBytes, err := os.ReadFile(configFilePath)
+	contentBytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("trying to read the config file: %v", err)
 	}

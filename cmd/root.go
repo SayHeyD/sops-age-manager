@@ -54,7 +54,7 @@ func executeSops(args []string) {
 		return
 	}
 
-	appConfig, err := config.NewConfigFromFile("")
+	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
 		log.Fatalf("execute sops: %v", err)
 	}

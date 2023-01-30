@@ -17,7 +17,7 @@ func getExpectedEncryptionKeyName() string {
 }
 
 func getExpectedKeyDir() string {
-	tempDir := os.TempDir() + string(os.PathSeparator) + "some-config.yaml"
+	tempDir := os.TempDir() + "key-dir"
 	return tempDir
 }
 
@@ -58,10 +58,13 @@ func TestNewConfigFromFileShouldReturnANonNilValue(t *testing.T) {
 	defer testDir.CleanTestDir(t)
 
 	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+	if err := os.Setenv(configFileEnv, testConfigFilePath); err != nil {
+		t.Fatalf("could not set \"%s\" to \"%s\"", configFileEnv, testConfigFilePath)
+	}
 
 	var config *Config
 
-	config, err := NewConfigFromFile(testConfigFilePath)
+	config, err := NewConfigFromFile()
 	if err != nil {
 		t.Fatalf("Error creating config from file: %v", err)
 	}
@@ -75,13 +78,16 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 	t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
-	defer testDir.CleanTestDir(t)
-	expectedEnryptionKeyName := getExpectedEncryptionKeyName()
+	// defer testDir.CleanTestDir(t)
+	expectedEncryptionKeyName := getExpectedEncryptionKeyName()
 	expectedDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
 	expectedFileContent := getExpectedFileContent()
 
 	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+	if err := os.Setenv(configFileEnv, testConfigFilePath); err != nil {
+		t.Fatalf("could not set \"%s\" to \"%s\"", configFileEnv, testConfigFilePath)
+	}
 
 	configFile, err := os.Create(testConfigFilePath)
 	if err != nil {
@@ -98,17 +104,17 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 
 	var config *Config
 
-	config, err = NewConfigFromFile(testConfigFilePath)
+	config, err = NewConfigFromFile()
 	if err != nil {
 		t.Fatalf("Error creating config from file: %v", err)
 	}
 
-	if config.EncryptionKeyName != expectedEnryptionKeyName {
-		t.Fatalf("The encryption key name \"%s\" differs from whats expected \"%s\"", config.EncryptionKeyName, expectedEnryptionKeyName)
+	if config.EncryptionKeyName != expectedEncryptionKeyName {
+		t.Fatalf("The encryption key name \"%s\" differs from whats expected \"%s\"", config.EncryptionKeyName, expectedEncryptionKeyName)
 	}
 
 	if config.DecryptionKeyName != expectedDecryptionKeyName {
-		t.Fatalf("The decryption key name \"%s\" differs from whats expected \"%s\"", config.DecryptionKeyName, expectedEnryptionKeyName)
+		t.Fatalf("The decryption key name \"%s\" differs from whats expected \"%s\"", config.DecryptionKeyName, expectedEncryptionKeyName)
 	}
 
 	if config.KeyDir != expectedKeyDir {
@@ -122,16 +128,20 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
 
+	configFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+
+	if err := os.Setenv(configFileEnv, configFilePath); err != nil {
+		t.Fatalf("could not set \"%s\" to \"%s\"", configFileEnv, configFilePath)
+	}
+
 	expectedEncryptionKeyName := getExpectedEncryptionKeyName()
-	expecteDecryptionKeyName := getExpectedDecryptionKeyName()
+	expectedDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
 	expectedFileContent := getExpectedFileContent()
 
-	if err := NewConfig(expectedEncryptionKeyName, expecteDecryptionKeyName, expectedKeyDir).Write(testDir.Path); err != nil {
+	if err := NewConfig(expectedEncryptionKeyName, expectedDecryptionKeyName, expectedKeyDir).Write(); err != nil {
 		t.Fatalf("could not write config file in folder \"%s\": %v", testDir.Path, err)
 	}
-
-	configFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
 
 	configFileContentBytes, err := os.ReadFile(configFilePath)
 	if err != nil {
@@ -282,15 +292,18 @@ func TestRawShouldReturnANonEmptyString(t *testing.T) {
 	defer testDir.CleanTestDir(t)
 
 	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+	if err := os.Setenv(configFileEnv, testConfigFilePath); err != nil {
+		t.Fatalf("could not set \"%s\" to \"%s\"", configFileEnv, testConfigFilePath)
+	}
 
 	var config *Config
 
-	config, err := NewConfigFromFile(testConfigFilePath)
+	config, err := NewConfigFromFile()
 	if err != nil {
 		t.Fatalf("Error creating config from file: %v", err)
 	}
 
-	configContent, err := config.Raw(testConfigFilePath)
+	configContent, err := config.Raw()
 	if err != nil {
 		t.Fatalf("Could not get the config from a file: %v", err)
 	}
@@ -309,6 +322,9 @@ func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
 	expectedFileContent := getExpectedFileContent()
 
 	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
+	if err := os.Setenv(configFileEnv, testConfigFilePath); err != nil {
+		t.Fatalf("could not set \"%s\" to \"%s\"", configFileEnv, testConfigFilePath)
+	}
 
 	configFile, err := os.Create(testConfigFilePath)
 	if err != nil {
@@ -325,35 +341,38 @@ func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
 
 	var config *Config
 
-	config, err = NewConfigFromFile(testConfigFilePath)
+	config, err = NewConfigFromFile()
 	if err != nil {
 		t.Fatalf("Could not get the config from a file: %v", err)
 	}
 
-	configContent, err := config.Raw(testConfigFilePath)
+	configContent, err := config.Raw()
 	if err != nil {
 		t.Fatalf("Could not get the content of the config: %v", err)
 	}
 
 	if configContent != expectedFileContent {
-
 		t.Fatalf("raw config content \"%s\" does not match with the expected config \"%s\"", configContent, expectedFileContent)
 	}
 }
 
 func TestGetConfigFilePathReturnsEmptyStringIfVarIsUnset(t *testing.T) {
+	t.Parallel()
+
 	err := os.Unsetenv(configFileEnv)
 	if err != nil {
 		t.Fatalf("could not unset env \"%s\"", configFileEnv)
 	}
 
-	configFilePath := GetConfigFilePath()
+	configFilePath := getConfigFilePath()
 	if configFilePath != "" {
 		t.Fatalf("\"configFileEnv\" renturned value \"%s\" expected was \"\"", configFilePath)
 	}
 }
 
 func TestGetConfigFilePathReturnsCorrectString(t *testing.T) {
+	t.Parallel()
+
 	expectedFilePath := "/some/random/directory/config.yaml"
 
 	err := os.Setenv(configFileEnv, expectedFilePath)
@@ -361,7 +380,7 @@ func TestGetConfigFilePathReturnsCorrectString(t *testing.T) {
 		t.Fatalf("could not set env \"%s\" to \"%s\"", configFileEnv, expectedFilePath)
 	}
 
-	configFilePath := GetConfigFilePath()
+	configFilePath := getConfigFilePath()
 	if configFilePath != expectedFilePath {
 		t.Fatalf("\"configFilePath\" renturned value \"%s\" expected was \"%s\"", configFilePath, expectedFilePath)
 	}

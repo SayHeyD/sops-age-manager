@@ -45,26 +45,26 @@ func getPubKeyFromFileContents(contents string) string {
 }
 
 func (k *Key) SetActiveEncryption() {
-	appConfig, err := config.NewConfigFromFile("")
+	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
 		log.Fatalf("Could not get application config: %v", err)
 	}
 
 	appConfig.EncryptionKeyName = k.Name
-	err = appConfig.Write("")
+	err = appConfig.Write()
 	if err != nil {
 		log.Fatalf("Could not write application config: %v", err)
 	}
 }
 
 func (k *Key) SetActiveDecryption() {
-	appConfig, err := config.NewConfigFromFile("")
+	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
 		log.Fatalf("Could not get application config: %v", err)
 	}
 
 	appConfig.DecryptionKeyName = k.Name
-	err = appConfig.Write("")
+	err = appConfig.Write()
 	if err != nil {
 		log.Fatalf("Could not write application config: %v", err)
 	}
