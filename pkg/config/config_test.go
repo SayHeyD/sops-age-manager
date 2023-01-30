@@ -358,17 +358,28 @@ func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
 	}
 }
 
-func TestGetConfigFilePathReturnsEmptyStringIfVarIsUnset(t *testing.T) {
+func TestGetConfigFilePathReturnsDefaultStringIfVarIsUnset(t *testing.T) {
 	// t.Parallel()
 
-	err := os.Unsetenv(configFileEnv)
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatalf("could not get user home directory: %v", err)
+	}
+
+	if homeDir[len(homeDir)-1:] != string(os.PathSeparator) {
+		homeDir += string(os.PathSeparator)
+	}
+
+	defaultConfigPath := homeDir + ".sops-age-manager/config.yaml"
+
+	err = os.Unsetenv(configFileEnv)
 	if err != nil {
 		t.Fatalf("could not unset env \"%s\"", configFileEnv)
 	}
 
 	configFilePath := getConfigFilePath()
-	if configFilePath != "" {
-		t.Fatalf("\"configFileEnv\" renturned value \"%s\" expected was \"\"", configFilePath)
+	if configFilePath != defaultConfigPath {
+		t.Fatalf("\"configFileEnv\" renturned value \"%s\" when expected value is \"%s\"", configFilePath, defaultConfigPath)
 	}
 }
 

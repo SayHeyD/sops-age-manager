@@ -12,10 +12,10 @@ func getTestBaseDir(t *testing.T) string {
 	tmpDir := os.TempDir()
 
 	if tmpDir[len(tmpDir)-1:] == string(os.PathSeparator) {
-		tmpDir = tmpDir[:len(tmpDir)-1]
+		tmpDir += string(os.PathSeparator)
 	}
 
-	dir := tmpDir + string(os.PathSeparator) + "sops-age-manager"
+	dir := tmpDir + "sops-age-manager"
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		if err := os.Mkdir(dir, os.ModePerm); err != nil {

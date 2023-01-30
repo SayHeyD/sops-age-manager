@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"gopkg.in/yaml.v3"
+	"log"
 	"os"
 	"strings"
 )
@@ -23,7 +24,23 @@ type Config struct {
 }
 
 func getConfigFilePath() string {
-	return os.Getenv(configFileEnv)
+
+	configPath := os.Getenv(configFileEnv)
+
+	if configPath == "" {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatalf("could not get user home directory: %v", err)
+		}
+
+		if homeDir[len(homeDir)-1:] != string(os.PathSeparator) {
+			homeDir += string(os.PathSeparator)
+		}
+
+		configPath = homeDir + ".sops-age-manager/config.yaml"
+	}
+
+	return configPath
 }
 
 func NewConfig(encryptionKeyName string, decryptionKeyName string, keyDir string) *Config {
