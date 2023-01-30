@@ -11,7 +11,7 @@ func getTestBaseDir(t *testing.T) string {
 	t.Helper()
 	tmpDir := os.TempDir()
 
-	if tmpDir[len(tmpDir)-1:] == string(os.PathSeparator) {
+	if tmpDir[len(tmpDir)-1:] != string(os.PathSeparator) {
 		tmpDir += string(os.PathSeparator)
 	}
 
