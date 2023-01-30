@@ -6,14 +6,14 @@ sam is a tool to easily manage your sops configuration when using multiple age k
 This is useful when f.ex. you have a k8s cluster where you have per-namespace decryption keys.
 
 # Table of contents
-- [sops-age-manager (sam)]()
-- [Table of contents]()
-- [Why isn't sops enough?]()
-- [What exactly does sam do?]()
-- [User guide]()
-  - [General]()
-  - [Commands]()
-  - [Configuration]()
+- [sops-age-manager (sam)](#sops-age-manager-sam)
+- [Table of contents](#table-of-contents)
+- [Why isn't sops enough?](#why-isnt-sops-enough)
+- [What exactly does sam do?](#what-exactly-does-sam-do)
+- [User guide](#user-guide)
+  - [General](#general)
+  - [Commands](#commands)
+  - [Configuration](#configuration)
 
 # Why isn't sops enough?
 
