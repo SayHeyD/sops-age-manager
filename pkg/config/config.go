@@ -7,14 +7,22 @@ import (
 	"strings"
 )
 
-const defaultConfig = `encryption-key: ""
+const (
+	defaultConfig = `encryption-key: ""
 decryption-key: ""
 key-dir: ""`
+
+	configFileEnv = "SOPS_AGE_MANAGER_CONFIG_DIR"
+)
 
 type Config struct {
 	EncryptionKeyName string `yaml:"encryption-key"`
 	DecryptionKeyName string `yaml:"decryption-key"`
 	KeyDir            string `yaml:"key-dir"`
+}
+
+func GetConfigFilePath() string {
+	return os.Getenv(configFileEnv)
 }
 
 func NewConfig(encryptionKeyName string, decryptionKeyName string, keyDir string) *Config {

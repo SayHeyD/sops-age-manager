@@ -340,3 +340,29 @@ func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
 		t.Fatalf("raw config content \"%s\" does not match with the expected config \"%s\"", configContent, expectedFileContent)
 	}
 }
+
+func TestGetConfigFilePathReturnsEmptyStringIfVarIsUnset(t *testing.T) {
+	err := os.Unsetenv(configFileEnv)
+	if err != nil {
+		t.Fatalf("could not unset env \"%s\"", configFileEnv)
+	}
+
+	configFilePath := GetConfigFilePath()
+	if configFilePath != "" {
+		t.Fatalf("\"configFileEnv\" renturned value \"%s\" expected was \"\"", configFilePath)
+	}
+}
+
+func TestGetConfigFilePathReturnsCorrectString(t *testing.T) {
+	expectedFilePath := "/some/random/directory/config.yaml"
+
+	err := os.Setenv(configFileEnv, expectedFilePath)
+	if err != nil {
+		t.Fatalf("could not set env \"%s\" to \"%s\"", configFileEnv, expectedFilePath)
+	}
+
+	configFilePath := GetConfigFilePath()
+	if configFilePath != expectedFilePath {
+		t.Fatalf("\"configFilePath\" renturned value \"%s\" expected was \"%s\"", configFilePath, expectedFilePath)
+	}
+}
