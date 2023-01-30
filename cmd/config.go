@@ -14,4 +14,5 @@ var (
 
 func init() {
 	configCommands.AddCommand(configDumpCommands)
+	configCommands.AddCommand(configPathCommands)
 }
