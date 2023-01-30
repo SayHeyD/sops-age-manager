@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
@@ -14,10 +13,9 @@ import (
 )
 
 var (
-	//go:embed version.txt
-	versionFile embed.FS
-
 	showVersion bool
+
+	appVersion string
 
 	rootCmd = &cobra.Command{
 		Use:   "sam",
@@ -33,7 +31,9 @@ GitHub: https://github.com/SayHeyD/sops-age-manager`,
 	}
 )
 
-func Execute() {
+func Execute(version string) {
+	appVersion = version
+
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatalf("executing rootCmd: %v", err)
 	}
@@ -50,9 +50,7 @@ func init() {
 
 func executeSops(args []string) {
 	if showVersion {
-		version, _ := versionFile.ReadFile("version.txt")
-
-		fmt.Printf("sam version: %s %s\n", string(version), runtime.Version())
+		fmt.Printf("sam version: %s %s\n", appVersion, runtime.Version())
 		return
 	}
 
