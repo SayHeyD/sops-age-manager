@@ -16,6 +16,7 @@ key-dir: ""`
 )
 
 type Config struct {
+	Path              string `yaml:"-"`
 	EncryptionKeyName string `yaml:"encryption-key"`
 	DecryptionKeyName string `yaml:"decryption-key"`
 	KeyDir            string `yaml:"key-dir"`
@@ -34,7 +35,9 @@ func NewConfig(encryptionKeyName string, decryptionKeyName string, keyDir string
 }
 
 func NewConfigFromFile() (*Config, error) {
-	contentBytes, err := getConfigFileContents(getConfigFilePath())
+	configFilePath := getConfigFilePath()
+
+	contentBytes, err := getConfigFileContents(configFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("trying generate a new config from a file: %v", err)
 	}
@@ -43,6 +46,8 @@ func NewConfigFromFile() (*Config, error) {
 	if err := yaml.Unmarshal(contentBytes, config); err != nil {
 		return nil, fmt.Errorf("cannot unmarshal the config file: %v", err)
 	}
+
+	config.Path = configFilePath
 
 	return config, nil
 }

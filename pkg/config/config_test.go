@@ -1,5 +1,7 @@
 package config
 
+// TODO: find way to make file write & read tests work consistently when run in parallel
+
 import (
 	"fmt"
 	"github.com/SayHeyD/sops-age-manager/test"
@@ -52,7 +54,7 @@ func TestNewConfig(t *testing.T) {
 }
 
 func TestNewConfigFromFileShouldReturnANonNilValue(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -75,10 +77,10 @@ func TestNewConfigFromFileShouldReturnANonNilValue(t *testing.T) {
 }
 
 func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
-	// defer testDir.CleanTestDir(t)
+	defer testDir.CleanTestDir(t)
 	expectedEncryptionKeyName := getExpectedEncryptionKeyName()
 	expectedDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
@@ -123,7 +125,7 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 }
 
 func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -156,7 +158,7 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 }
 
 func TestGetConfigDirPathReturnsCorrectDirectory(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -176,7 +178,7 @@ func TestGetConfigDirPathReturnsCorrectDirectory(t *testing.T) {
 }
 
 func TestGetConfigFileContentsShouldReturnTheDefaultConfigIfNoFileExists(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -195,7 +197,7 @@ func TestGetConfigFileContentsShouldReturnTheDefaultConfigIfNoFileExists(t *test
 }
 
 func TestGetConfigFileContentsShouldCreateAFileIfNotExist(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -213,7 +215,7 @@ func TestGetConfigFileContentsShouldCreateAFileIfNotExist(t *testing.T) {
 }
 
 func TestGetConfigFileContentsShouldNotCreateNewFileIfOneAlreadyExists(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -253,7 +255,7 @@ func TestGetConfigFileContentsShouldNotCreateNewFileIfOneAlreadyExists(t *testin
 }
 
 func TestGetConfigFileContentsShouldReturnAExpectedFileContents(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -286,7 +288,7 @@ func TestGetConfigFileContentsShouldReturnAExpectedFileContents(t *testing.T) {
 }
 
 func TestRawShouldReturnANonEmptyString(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -314,7 +316,7 @@ func TestRawShouldReturnANonEmptyString(t *testing.T) {
 }
 
 func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
@@ -357,7 +359,7 @@ func TestRawShouldReturnTheExpectedFileContent(t *testing.T) {
 }
 
 func TestGetConfigFilePathReturnsEmptyStringIfVarIsUnset(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	err := os.Unsetenv(configFileEnv)
 	if err != nil {
@@ -371,7 +373,7 @@ func TestGetConfigFilePathReturnsEmptyStringIfVarIsUnset(t *testing.T) {
 }
 
 func TestGetConfigFilePathReturnsCorrectString(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	expectedFilePath := "/some/random/directory/config.yaml"
 
