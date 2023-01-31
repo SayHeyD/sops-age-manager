@@ -17,7 +17,7 @@ var (
 
 	appVersion string
 
-	rootCmd = &cobra.Command{
+	RootCmd = &cobra.Command{
 		Use:   "sam",
 		Short: "Sops-Age-Manager (SAM) is a tool for managing multiple age keys when using mozilla/sops",
 		Long: `Sops-Age-Manager (SAM) is a tool for managing the age key used by sops.
@@ -34,7 +34,7 @@ GitHub: https://github.com/SayHeyD/sops-age-manager`,
 func Execute(version string) {
 	appVersion = version
 
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		log.Fatalf("executing rootCmd: %v", err)
 	}
 }
@@ -42,10 +42,10 @@ func Execute(version string) {
 func init() {
 	cobra.OnInitialize()
 
-	rootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Shows the current version of sam")
+	RootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Shows the current version of sam")
 
-	rootCmd.AddCommand(keyCommands)
-	rootCmd.AddCommand(configCommands)
+	RootCmd.AddCommand(keyCommands)
+	RootCmd.AddCommand(configCommands)
 }
 
 func executeSops(args []string) {
