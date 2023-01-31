@@ -57,6 +57,7 @@ The base command of sam just calls sops with the passed arguments:
 sam -- <SOPS_ARGS_HERE>
 ```
 
+The ```--age``` argument is passed automatically by sam.
 
 __COMMAND DOCUMENTATION:__
 
@@ -70,4 +71,25 @@ __COMMAND DOCUMENTATION:__
 
 ## Configuration
 
-> TODO
+Configuration is quite minimal and lets you configure the following values:
+
+- [encryption-key](#encryption-key)
+- [decryption-key](#decryption-key)
+- [key-dir](#key-dir)
+
+### Encryption Key
+
+The name of the encryption key to use. This is passed to sops as the ```--age``` arg to sops.
+Available key names can be listed with the [sam key list](./docs/sam_key_list.md) command.
+
+### Decryption Key
+
+The name of the decryption key to use. This is set as the value of the ```SOPS_AGE_KEY```
+environment variable which is consumed by sops.
+Available key names can be listed with the [sam key list](./docs/sam_key_list.md) command.
+
+### Key dir
+
+The directory where the age keys are stored. This has to be an absolute filepath. Environment variables are not parsed.
+
+All keys that are not directly in the key-dir i.e. in subfolders will not be detected by sam.
