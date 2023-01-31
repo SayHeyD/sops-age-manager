@@ -11,7 +11,9 @@ This is useful when f.ex. you have a k8s cluster where you have per-namespace de
 - [Why isn't sops enough?](#why-isnt-sops-enough)
 - [What exactly does sam do?](#what-exactly-does-sam-do)
 - [User guide](#user-guide)
+  - [Prerequisites](#prerequisites)
   - [General](#general)
+  - [Installation](#installation)
   - [Commands](#commands)
   - [Configuration](#configuration)
 
@@ -29,15 +31,42 @@ provides some small helper commands to manage and access your key data.
 
 # User guide
 
-> TODO
+## Prerequisites
+
+sam requires [sops](https://github.com/mozilla/sops) to be installed before it can be used.
+If sops is not installed everything still works as expected aside from the base command, which passes
+its args to sops. sam also requires sops to be in the PATH.
 
 ## General
 
-> TODO
+After installation add the age key files to the following path ```$HOME/.age/```. sam will detect age keys
+in this directory automatically by default. The filename should follow the following format: ```<KEY_NAME>.txt```.
+
+The default config file for sam will be created at ```$HOME/.sops-age-manager/config.yaml``` on first usage of sam
+if it doesn't exist already.
+
+## Installation
+
+Download the binary for your OS from the releases page on GitHub.
 
 ## Commands
 
-> TODO
+The base command of sam just calls sops with the passed arguments:
+
+```bash
+sam -- <SOPS_ARGS_HERE>
+```
+
+
+__COMMAND DOCUMENTATION:__
+
+- [SAM](./docs/sam.md)
+  - [Config](./docs/sam_config.md)
+    - [Dump](./docs/sam_config_dump.md)
+    - [Path](./docs/sam_config_path.md)
+  - [Key](./docs/sam_key.md)
+    - [List](./docs/sam_key_list.md)
+    - [Use](./docs/sam_key_use.md)
 
 ## Configuration
 
