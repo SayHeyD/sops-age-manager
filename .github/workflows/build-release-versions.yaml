@@ -1,0 +1,90 @@
+name: "Build release versions"
+on:
+  push:
+    branches:
+      - main
+      - beta
+      - dev
+  pull_request:
+    branches:
+      - main
+      - beta
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Install dependencies
+        run: go get -t ./...
+
+      - name: Run tests
+        run: make test
+
+  build-macos-amd64:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build macos amd64
+        run: GOARCH=amd64 GOOS=darwin go build -tags main -o bin/sam_darwin_amd64 .
+
+  build-macos-arm64:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build macos arm64
+        run: GOARCH=arm64 GOOS=darwin go build -tags main -o bin/sam_darwin_arm64 .
+
+  build-linux-amd64:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build linux amd64
+        run: GOARCH=amd64 GOOS=linux go build -tags main -o bin/sam_linux_amd64 .
+
+  build-linux-arm64:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build linux arm64
+        run: GOARCH=arm64 GOOS=linux go build -tags main -o bin/sam_linux_arm64 .
+
+  build-windows-amd64:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build windows amd64
+        run: GOARCH=amd64 GOOS=windows go build -tags main -o bin/sam_windows_amd64.exe .
+
+  build-windows-arm64:
+    needs:
+      - setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build windows arm64
+        run: GOARCH=arm64 GOOS=windows go build -tags main -o bin/sam_windows_arm64.exe .
+
+  upload-build-artifacts:
+    needs:
+      - build-macos-amd64
+      - build-macos-arm64
+      - build-linux-amd64
+      - build-linux-arm64
+      - build-windows-amd64
+      - build-windows-arm64
+    steps:
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: bin/*
