@@ -10,6 +10,10 @@ import (
 	"testing"
 )
 
+func getExpectedConfigVersion() string {
+	return "v1"
+}
+
 func getExpectedDecryptionKeyName() string {
 	return "some_key_name"
 }
@@ -24,10 +28,11 @@ func getExpectedKeyDir() string {
 }
 
 func getExpectedFileContent() string {
-	defaultConfigTemplateString := `encryption-key: %s
-decryption-key: %s
-key-dir: %s`
-	return fmt.Sprintf(defaultConfigTemplateString, getExpectedEncryptionKeyName(),
+	defaultConfigTemplateString := `configVersion: %s
+encryptionKey: %s
+decryptionKey: %s
+keyDir: %s`
+	return fmt.Sprintf(defaultConfigTemplateString, getExpectedConfigVersion(), getExpectedEncryptionKeyName(),
 		getExpectedDecryptionKeyName(), getExpectedKeyDir())
 }
 
@@ -37,6 +42,7 @@ func TestNewConfig(t *testing.T) {
 	expectedEncryptionKeyName := getExpectedEncryptionKeyName()
 	expectedDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
+	expectedVersion := getExpectedConfigVersion()
 
 	config := NewConfig(expectedEncryptionKeyName, expectedDecryptionKeyName, expectedKeyDir)
 
@@ -50,6 +56,10 @@ func TestNewConfig(t *testing.T) {
 
 	if config.KeyDir != expectedKeyDir {
 		t.Fatalf("The KeyDir \"%s\" did not match the expected value \"%s\"", config.KeyDir, expectedKeyDir)
+	}
+
+	if config.Version != expectedVersion {
+		t.Fatalf("The Version \"%s\" did not match the expected value \"%s\"", config.Version, expectedVersion)
 	}
 }
 
@@ -81,9 +91,11 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
+
 	expectedEncryptionKeyName := getExpectedEncryptionKeyName()
 	expectedDecryptionKeyName := getExpectedDecryptionKeyName()
 	expectedKeyDir := getExpectedKeyDir()
+	expectedConfigVersion := getExpectedConfigVersion()
 	expectedFileContent := getExpectedFileContent()
 
 	testConfigFilePath := testDir.Path + string(os.PathSeparator) + "config.yaml"
@@ -121,6 +133,10 @@ func TestNewConfigFromFileShouldReturnAConfigWithTheCorrectValues(t *testing.T) 
 
 	if config.KeyDir != expectedKeyDir {
 		t.Fatalf("The key dir \"%s\" differs from whats expected \"%s\"", config.KeyDir, expectedKeyDir)
+	}
+
+	if config.Version != expectedConfigVersion {
+		t.Fatalf("The version \"%s\" differs from whats expected \"%s\"", config.Version, expectedConfigVersion)
 	}
 }
 

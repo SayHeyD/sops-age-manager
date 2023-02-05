@@ -9,18 +9,20 @@ import (
 )
 
 const (
-	defaultConfig = `encryption-key: ""
-decryption-key: ""
-key-dir: ""`
+	defaultConfig = `configVersion: v1
+encryptionKey: ""
+decryptionKey: ""
+keyDir: ""`
 
 	configFileEnv = "SOPS_AGE_MANAGER_CONFIG_DIR"
 )
 
 type Config struct {
 	Path              string `yaml:"-"`
-	EncryptionKeyName string `yaml:"encryption-key"`
-	DecryptionKeyName string `yaml:"decryption-key"`
-	KeyDir            string `yaml:"key-dir"`
+	Version           string `yaml:"configVersion"`
+	EncryptionKeyName string `yaml:"encryptionKey"`
+	DecryptionKeyName string `yaml:"decryptionKey"`
+	KeyDir            string `yaml:"keyDir"`
 }
 
 func getConfigFilePath() string {
@@ -45,6 +47,7 @@ func getConfigFilePath() string {
 
 func NewConfig(encryptionKeyName string, decryptionKeyName string, keyDir string) *Config {
 	return &Config{
+		Version:           "v1",
 		EncryptionKeyName: encryptionKeyName,
 		DecryptionKeyName: decryptionKeyName,
 		KeyDir:            keyDir,
