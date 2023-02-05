@@ -14,7 +14,7 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 	if keyDirPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			log.Fatal(fmt.Sprintf("cannot get the users home directory: %v", err))
+			log.Fatalf("cannot get the users home directory: %v", err)
 		}
 
 		keyDirPath = homeDir + string(os.PathSeparator) + ".age"
@@ -44,7 +44,7 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 			return err
 		}
 
-		key := NewKey(keyName, string(keyFileContent))
+		key := NewKey(keyName, fullPath, string(keyFileContent))
 
 		for _, processedKey := range keys {
 			if key.Name == processedKey.Name {
@@ -57,7 +57,7 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 		return nil
 	})
 	if err != nil {
-		log.Fatal(fmt.Sprintf("readKeyFiles: %v", err))
+		log.Fatalf("readKeyFiles: %v", err)
 	}
 
 	return keys

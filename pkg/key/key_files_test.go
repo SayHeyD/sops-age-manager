@@ -1,7 +1,7 @@
 package key
 
 import (
-	"github.com/google/uuid"
+	"github.com/SayHeyD/sops-age-manager/test"
 	"os"
 	"testing"
 )
@@ -12,11 +12,6 @@ type TestKeyFiles struct {
 	FileContent string
 	PrivateKey  string
 	PublicKey   string
-}
-
-// getTestBaseDir returns the base path for creating test directories
-func getTestBaseDir() string {
-	return os.TempDir() + string(os.PathSeparator) + "sops-age-manager"
 }
 
 // getTestKeys returns age key values for testing. The returned keys are not real key pairs.
@@ -56,30 +51,13 @@ AGE-SECRET-KEY-HFANZUT5LT3K8ZRFZFHS36XWKCVDKEKJ2M7WKQN3MFYUGIP4WWM7DT1CGV3`,
 prepareKeyTestDir generates a temporary directory, with a unique name, where key files will be written to
 in order to execute tests in an isolated directory. The string returned is the absolute filepath of the directory.
 */
-func prepareKeyTestDir(t *testing.T) string {
-	baseDir := getTestBaseDir()
-	testDir := baseDir + string(os.PathSeparator) + uuid.NewString()
-
-	if _, err := os.Stat(baseDir); os.IsNotExist(err) {
-		if err := os.Mkdir(baseDir, os.ModePerm); err != nil {
-			t.Fatalf("Could not create testing directories: %v", err)
-		}
-	} else if err != nil {
-		t.Fatalf("Could not check if testing directory exist: %v", err)
-	}
-
-	if _, err := os.Stat(testDir); os.IsNotExist(err) {
-		if err := os.Mkdir(testDir, os.ModePerm); err != nil {
-			t.Fatalf("Could not create testing directories: %v", err)
-		}
-	} else if err != nil {
-		t.Fatalf("Could not check if testing directory exist: %v", err)
-	}
+func prepareKeyTestDir(t *testing.T) *test.Dir {
+	testDir := test.GenerateNewUniqueTestDir(t)
 
 	keys := getTestKeys()
 
 	for _, key := range keys {
-		filePath := testDir + string(os.PathSeparator) + key.FileName
+		filePath := testDir.Path + string(os.PathSeparator) + key.FileName
 
 		keyFile, err := os.Create(filePath)
 		if err != nil {
@@ -98,19 +76,12 @@ func prepareKeyTestDir(t *testing.T) string {
 	return testDir
 }
 
-// cleanTestDir removes the test directory and all contents of it.
-func cleanTestDir(t *testing.T, directory string) {
-	err := os.RemoveAll(directory)
-	if err != nil {
-		t.Fatalf("Could not delete test directory \"%s\": %v", directory, err)
-	}
-}
-
 func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 	t.Parallel()
 	testDir := prepareKeyTestDir(t)
+	defer testDir.CleanTestDir(t)
 
-	keys := GetAvailableKeys(testDir)
+	keys := GetAvailableKeys(testDir.Path)
 
 	lengthOfFetchedKeys := len(keys)
 	lengthOfTestKeys := len(getTestKeys())
@@ -121,15 +92,14 @@ func TestGetAvailableKeysReturnsCorrectAmountOfKeys(t *testing.T) {
 			lengthOfFetchedKeys, lengthOfTestKeys,
 		)
 	}
-
-	cleanTestDir(t, testDir)
 }
 
 func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 	t.Parallel()
 	testDir := prepareKeyTestDir(t)
+	defer testDir.CleanTestDir(t)
 
-	keys := GetAvailableKeys(testDir)
+	keys := GetAvailableKeys(testDir.Path)
 	wantedKeys := getTestKeys()
 
 	for i, key := range keys {
@@ -151,6 +121,4 @@ func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 			t.Fatalf("public key \"%s\" does not match with expected public key \"%s\"", key.PublicKey, wantedKey.PublicKey)
 		}
 	}
-
-	cleanTestDir(t, testDir)
 }
