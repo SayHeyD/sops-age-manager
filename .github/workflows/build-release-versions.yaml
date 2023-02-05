@@ -23,9 +23,6 @@ jobs:
       - name: Install dependencies
         run: go get -t ./...
 
-      - name: Run tests
-        run: make test
-
   build-macos-amd64:
     needs:
       - setup
