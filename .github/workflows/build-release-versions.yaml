@@ -20,6 +20,11 @@ jobs:
         uses: ./.github/workflows/common/go-setup
       - name: Build macos amd64
         run: GOARCH=amd64 GOOS=darwin go build -tags main -o bin/sam_darwin_amd64 .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: bin/*
 
   build-macos-arm64:
     runs-on: ubuntu-latest
@@ -29,6 +34,11 @@ jobs:
         uses: ./.github/workflows/common/go-setup
       - name: Build macos arm64
         run: GOARCH=arm64 GOOS=darwin go build -tags main -o bin/sam_darwin_arm64 .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: bin/*
 
   build-linux-amd64:
     runs-on: ubuntu-latest
@@ -38,6 +48,11 @@ jobs:
         uses: ./.github/workflows/common/go-setup
       - name: Build linux amd64
         run: GOARCH=amd64 GOOS=linux go build -tags main -o bin/sam_linux_amd64 .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: bin/*
 
   build-linux-arm64:
     runs-on: ubuntu-latest
@@ -47,6 +62,11 @@ jobs:
         uses: ./.github/workflows/common/go-setup
       - name: Build linux arm64
         run: GOARCH=arm64 GOOS=linux go build -tags main -o bin/sam_linux_arm64 .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: bin/*
 
   build-windows-amd64:
     runs-on: ubuntu-latest
@@ -56,6 +76,11 @@ jobs:
         uses: ./.github/workflows/common/go-setup
       - name: Build windows amd64
         run: GOARCH=amd64 GOOS=windows go build -tags main -o bin/sam_windows_amd64.exe .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: bin/*
 
   build-windows-arm64:
     runs-on: ubuntu-latest
@@ -65,19 +90,7 @@ jobs:
         uses: ./.github/workflows/common/go-setup
       - name: Build windows arm64
         run: GOARCH=arm64 GOOS=windows go build -tags main -o bin/sam_windows_arm64.exe .
-
-  upload-build-artifacts:
-    needs:
-      - build-macos-amd64
-      - build-macos-arm64
-      - build-linux-amd64
-      - build-linux-arm64
-      - build-windows-amd64
-      - build-windows-arm64
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: my-artifact
