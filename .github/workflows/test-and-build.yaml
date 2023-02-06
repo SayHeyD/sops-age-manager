@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup
-        uses: ./.github/workflows/common/go-setup.yml
+        uses: ./.github/workflows/common/go-setup
 
       - name: Run tests
         run: make test
