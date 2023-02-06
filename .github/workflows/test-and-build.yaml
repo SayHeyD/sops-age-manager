@@ -9,13 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
-      - name: Install dependencies
-        run: go get -t ./...
+      - name: Setup
+        uses: ./.github/workflows/common/go-setup.yml
 
       - name: Run tests
         run: make test

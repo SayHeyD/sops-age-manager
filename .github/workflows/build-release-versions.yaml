@@ -10,24 +10,13 @@ on:
       - main
       - beta
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
-      - name: Install dependencies
-        run: go get -t ./...
-
   build-macos-amd64:
     needs:
       - setup
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        uses: ./.github/workflows/common/go-setup.yml
       - name: Build macos amd64
         run: GOARCH=amd64 GOOS=darwin go build -tags main -o bin/sam_darwin_amd64 .
 
@@ -36,6 +25,8 @@ jobs:
       - setup
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        uses: ./.github/workflows/common/go-setup.yml
       - name: Build macos arm64
         run: GOARCH=arm64 GOOS=darwin go build -tags main -o bin/sam_darwin_arm64 .
 
@@ -44,6 +35,8 @@ jobs:
       - setup
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        uses: ./.github/workflows/common/go-setup.yml
       - name: Build linux amd64
         run: GOARCH=amd64 GOOS=linux go build -tags main -o bin/sam_linux_amd64 .
 
@@ -52,6 +45,8 @@ jobs:
       - setup
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        uses: ./.github/workflows/common/go-setup.yml
       - name: Build linux arm64
         run: GOARCH=arm64 GOOS=linux go build -tags main -o bin/sam_linux_arm64 .
 
@@ -60,6 +55,8 @@ jobs:
       - setup
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        uses: ./.github/workflows/common/go-setup.yml
       - name: Build windows amd64
         run: GOARCH=amd64 GOOS=windows go build -tags main -o bin/sam_windows_amd64.exe .
 
@@ -68,6 +65,8 @@ jobs:
       - setup
     runs-on: ubuntu-latest
     steps:
+      - name: Setup
+        uses: ./.github/workflows/common/go-setup.yml
       - name: Build windows arm64
         run: GOARCH=arm64 GOOS=windows go build -tags main -o bin/sam_windows_arm64.exe .
 
