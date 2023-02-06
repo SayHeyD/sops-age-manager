@@ -37,6 +37,9 @@ sam requires [sops](https://github.com/mozilla/sops) to be installed before it c
 If sops is not installed everything still works as expected aside from the base command, which passes
 its args to sops. sam also requires sops to be in the PATH.
 
+[age](https://github.com/FiloSottile/age) isn't per se a requirement, 
+but you will already need to have age keys to use sam. Sam will not create age keys for you.
+
 ## General
 
 After installation add the age key files to the following path ```$HOME/.age/```. sam will detect age keys
@@ -48,6 +51,14 @@ if it doesn't exist already.
 ## Installation
 
 Download the binary for your OS from the releases page on GitHub.
+
+Make sure to set the active key before using sam, 
+if not sops will return an error and sam will return the following error.
+
+```
+Could not find encryption key ""
+Could not find encryption key ""
+```
 
 ## Commands
 
