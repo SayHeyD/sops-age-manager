@@ -1,4 +1,5 @@
 name: "Build release versions"
+
 on:
   push:
     branches:
@@ -9,10 +10,9 @@ on:
     branches:
       - main
       - beta
+
 jobs:
   build-macos-amd64:
-    needs:
-      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Setup
@@ -21,8 +21,6 @@ jobs:
         run: GOARCH=amd64 GOOS=darwin go build -tags main -o bin/sam_darwin_amd64 .
 
   build-macos-arm64:
-    needs:
-      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Setup
@@ -31,8 +29,6 @@ jobs:
         run: GOARCH=arm64 GOOS=darwin go build -tags main -o bin/sam_darwin_arm64 .
 
   build-linux-amd64:
-    needs:
-      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Setup
@@ -41,8 +37,6 @@ jobs:
         run: GOARCH=amd64 GOOS=linux go build -tags main -o bin/sam_linux_amd64 .
 
   build-linux-arm64:
-    needs:
-      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Setup
@@ -51,8 +45,6 @@ jobs:
         run: GOARCH=arm64 GOOS=linux go build -tags main -o bin/sam_linux_arm64 .
 
   build-windows-amd64:
-    needs:
-      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Setup
@@ -61,8 +53,6 @@ jobs:
         run: GOARCH=amd64 GOOS=windows go build -tags main -o bin/sam_windows_amd64.exe .
 
   build-windows-arm64:
-    needs:
-      - setup
     runs-on: ubuntu-latest
     steps:
       - name: Setup
