@@ -1,5 +1,6 @@
 name: "Test and Build"
 on:
+  workflow_dispatch: {}
   push:
     paths:
       - '**.go'
