@@ -1,5 +1,9 @@
 name: "Test and Build"
-on: [push]
+on:
+  push:
+    paths:
+      - '**.go'
+      - '.github/workflows/test-and-build.yaml'
 jobs:
   test-and-build:
     strategy:
