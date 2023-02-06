@@ -15,6 +15,7 @@ jobs:
   build-macos-amd64:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/workflows/common/go-setup
       - name: Build macos amd64
@@ -23,6 +24,7 @@ jobs:
   build-macos-arm64:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/workflows/common/go-setup
       - name: Build macos arm64
@@ -31,6 +33,7 @@ jobs:
   build-linux-amd64:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/workflows/common/go-setup
       - name: Build linux amd64
@@ -39,6 +42,7 @@ jobs:
   build-linux-arm64:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/workflows/common/go-setup
       - name: Build linux arm64
@@ -47,6 +51,7 @@ jobs:
   build-windows-amd64:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/workflows/common/go-setup
       - name: Build windows amd64
@@ -55,6 +60,7 @@ jobs:
   build-windows-arm64:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/workflows/common/go-setup
       - name: Build windows arm64
@@ -70,6 +76,7 @@ jobs:
       - build-windows-arm64
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
