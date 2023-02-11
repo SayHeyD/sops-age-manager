@@ -50,7 +50,7 @@ func init() {
 
 func executeSops(args []string) {
 	if showVersion {
-		fmt.Printf("sam version: %s %s\n", appVersion, runtime.Version())
+		fmt.Printf("sam version: %s (%s)\n", appVersion, runtime.Version())
 		return
 	}
 
