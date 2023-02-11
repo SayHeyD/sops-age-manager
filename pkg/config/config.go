@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -121,6 +122,16 @@ func getConfigDirPath() (string, error) {
 }
 
 func getConfigFileContents(path string) ([]byte, error) {
+
+	configDir, _ := filepath.Split(path)
+
+	if _, err := os.Stat(configDir); os.IsNotExist(err) {
+		err = os.MkdirAll(configDir, os.ModePerm)
+		if err != nil {
+			return nil, fmt.Errorf("trying to create the config directory \"%s\": %v", configDir, err)
+		}
+	}
+
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		configFile, err := os.Create(path)
 		if err != nil {

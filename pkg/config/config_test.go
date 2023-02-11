@@ -303,6 +303,25 @@ func TestGetConfigFileContentsShouldReturnAExpectedFileContents(t *testing.T) {
 	}
 }
 
+func TestGetConfigFileContentsShouldCreateTheConfigDirectoryIfNotExists(t *testing.T) {
+	// t.Parallel()
+
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	testConfigDirectory := testDir.Path + string(os.PathSeparator) + ".sops-age-manager"
+	testConfigFilePath := testConfigDirectory + string(os.PathSeparator) + "config.yaml"
+
+	_, err := getConfigFileContents(testConfigFilePath)
+	if err != nil {
+		t.Fatalf("Error getting config from file: %v", err)
+	}
+
+	if _, err := os.Stat(testConfigDirectory); os.IsNotExist(err) {
+		t.Fatalf("The config directory \"%s\" should exist but does not", testConfigDirectory)
+	}
+}
+
 func TestRawShouldReturnANonEmptyString(t *testing.T) {
 	// t.Parallel()
 
