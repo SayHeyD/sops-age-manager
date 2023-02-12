@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/SayHeyD/sops-age-manager/internal/ui"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
 	"github.com/spf13/cobra"
@@ -23,6 +24,8 @@ var (
 		Long: `Sops-Age-Manager (SAM) is a tool for managing the age key used by sops.
 This wrapper for sops should provide key selection by name, rather than
 by using the private or public key.
+
+Run the program without flags or subcommands to launch the app as a tray-icon.
 
 GitHub: https://github.com/SayHeyD/sops-age-manager`,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -49,14 +52,19 @@ func init() {
 }
 
 func executeSops(args []string) {
-	if showVersion {
-		fmt.Printf("sam version: %s (%s)\n", appVersion, runtime.Version())
-		return
-	}
-
 	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
 		log.Fatalf("execute sops: %v", err)
+	}
+
+	if len(args) == 0 {
+		ui.Init(appConfig)
+		return
+	}
+
+	if showVersion {
+		fmt.Printf("sam version: %s (%s)\n", appVersion, runtime.Version())
+		return
 	}
 
 	var wantedEncryptionKey *key.Key
