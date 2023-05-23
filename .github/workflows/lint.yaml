@@ -5,6 +5,7 @@ on:
     paths:
       - '**.go'
       - '.github/workflows/lint.yaml'
+      - '.github/workflows/common/go-setup/action.yaml'
   pull_request: {}
 jobs:
   linting:

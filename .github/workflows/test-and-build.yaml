@@ -5,6 +5,7 @@ on:
     paths:
       - '**.go'
       - '.github/workflows/test-and-build.yaml'
+      - '.github/workflows/common/go-setup/action.yaml'
 jobs:
   test-and-build:
     strategy:
