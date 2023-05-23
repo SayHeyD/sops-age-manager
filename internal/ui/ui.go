@@ -3,7 +3,7 @@ package ui
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/driver/desktop" //nolint:unused
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
 	"github.com/atotto/clipboard"
