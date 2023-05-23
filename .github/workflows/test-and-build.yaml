@@ -19,7 +19,7 @@ jobs:
         uses: ./.github/workflows/common/go-setup
 
       - name: Install dev dependencies
-        if: ${{ matrix.os }} == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev -y
 
