@@ -77,14 +77,28 @@ func executeSops(args []string) {
 	if wantedEncryptionKey == nil {
 		log.Printf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
 	} else {
-		err = os.Setenv("SOPS_AGE_KEY", wantedEncryptionKey.PrivateKey)
-		if err != nil {
-			log.Fatalf("could not set env variable: %v", err)
+		for index, arg := range args {
+			if arg == "sops" {
+				argsUntilSops := make([]string, len(args[:index+1]))
+				argsAfterSops := make([]string, len(args[index+1:]))
+
+				copy(argsUntilSops, args[:index+1])
+				copy(argsAfterSops, args[index+1:])
+
+				firstArgHalf := append(argsUntilSops, "--age", wantedEncryptionKey.PublicKey)
+				args = append(firstArgHalf, argsAfterSops...)
+			}
 		}
+
 	}
 
 	if wantedDecryptionKey == nil {
 		log.Printf("Could not find decryption key \"%s\"", appConfig.DecryptionKeyName)
+	} else {
+		err = os.Setenv("SOPS_AGE_KEY", wantedDecryptionKey.PrivateKey)
+		if err != nil {
+			log.Fatalf("could not set env variable: %v", err)
+		}
 	}
 
 	var passThroughOut bytes.Buffer
