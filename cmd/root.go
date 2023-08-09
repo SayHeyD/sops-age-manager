@@ -24,6 +24,9 @@ var (
 This wrapper for sops should provide key selection by name, rather than
 by using the private or public key.
 
+Use the base command with '--' after which you can execute what you want. 
+The sops configuration will be applied automatically.
+
 GitHub: https://github.com/SayHeyD/sops-age-manager`,
 		Run: func(cmd *cobra.Command, args []string) {
 			executeSops(args)
