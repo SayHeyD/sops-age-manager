@@ -85,23 +85,21 @@ func executeSops(args []string) {
 
 	if wantedDecryptionKey == nil {
 		log.Printf("Could not find encryption key \"%s\"", appConfig.DecryptionKeyName)
-	} else {
-		args = append([]string{"--age", wantedDecryptionKey.PublicKey}, args...)
 	}
 
-	var sopsOut bytes.Buffer
-	var stderr bytes.Buffer
+	var passThroughOut bytes.Buffer
+	var passThroughErr bytes.Buffer
 
-	sopsCmd := exec.Command("sops", args...)
+	sopsCmd := exec.Command(args[0], args[1:]...)
 
-	sopsCmd.Stdout = &sopsOut
-	sopsCmd.Stderr = &stderr
+	sopsCmd.Stdout = &passThroughOut
+	sopsCmd.Stderr = &passThroughErr
 
 	err = sopsCmd.Run()
 	if err != nil {
-		fmt.Printf("sops error: %v: %s", err, stderr.String())
+		fmt.Printf("sops error: %v: %s", err, passThroughErr.String())
 		return
 	}
 
-	fmt.Print(sopsOut.String())
+	fmt.Print(passThroughOut.String())
 }
