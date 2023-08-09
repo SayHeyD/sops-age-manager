@@ -62,10 +62,20 @@ Could not find encryption key ""
 
 ## Commands
 
-The base command of sam just calls sops with the passed arguments:
+The base command of sam does nothing by itself without a ```--``` separator after which you can 
+execute whatever you want. The base command simply sets the ```SOPS_AGE_KEY``` environment variable to 
+the correct value. For sops commands the ```--age``` argument will be injected automatically to the selected key.
+
+### Examples
 
 ```bash
-sam -- <SOPS_ARGS_HERE>
+sam key use private-helm-manifest
+sam -- sops -d super-secret.enc.yaml
+```
+
+```bash
+sam key use private-helm-manifest
+sam -- sops -e super-secret.dec.yaml
 ```
 
 The ```--age``` argument is passed automatically by sam.
