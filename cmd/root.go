@@ -84,7 +84,7 @@ func executeSops(args []string) {
 	}
 
 	if wantedDecryptionKey == nil {
-		log.Printf("Could not find encryption key \"%s\"", appConfig.DecryptionKeyName)
+		log.Printf("Could not find decryption key \"%s\"", appConfig.DecryptionKeyName)
 	}
 
 	var passThroughOut bytes.Buffer
