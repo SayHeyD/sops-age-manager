@@ -24,6 +24,9 @@ var (
 This wrapper for sops should provide key selection by name, rather than
 by using the private or public key.
 
+Use the base command with '--' after which you can execute what you want. 
+The sops configuration will be applied automatically.
+
 GitHub: https://github.com/SayHeyD/sops-age-manager`,
 		Run: func(cmd *cobra.Command, args []string) {
 			executeSops(args)
@@ -77,31 +80,43 @@ func executeSops(args []string) {
 	if wantedEncryptionKey == nil {
 		log.Printf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
 	} else {
-		err = os.Setenv("SOPS_AGE_KEY", wantedEncryptionKey.PrivateKey)
+		for index, arg := range args {
+			if arg == "sops" {
+				argsUntilSops := make([]string, len(args[:index+1]))
+				argsAfterSops := make([]string, len(args[index+1:]))
+
+				copy(argsUntilSops, args[:index+1])
+				copy(argsAfterSops, args[index+1:])
+
+				firstArgHalf := append(argsUntilSops, "--age", wantedEncryptionKey.PublicKey)
+				args = append(firstArgHalf, argsAfterSops...)
+			}
+		}
+
+	}
+
+	if wantedDecryptionKey == nil {
+		log.Printf("Could not find decryption key \"%s\"", appConfig.DecryptionKeyName)
+	} else {
+		err = os.Setenv("SOPS_AGE_KEY", wantedDecryptionKey.PrivateKey)
 		if err != nil {
 			log.Fatalf("could not set env variable: %v", err)
 		}
 	}
 
-	if wantedDecryptionKey == nil {
-		log.Printf("Could not find encryption key \"%s\"", appConfig.DecryptionKeyName)
-	} else {
-		args = append([]string{"--age", wantedDecryptionKey.PublicKey}, args...)
-	}
+	var passThroughOut bytes.Buffer
+	var passThroughErr bytes.Buffer
 
-	var sopsOut bytes.Buffer
-	var stderr bytes.Buffer
+	sopsCmd := exec.Command(args[0], args[1:]...)
 
-	sopsCmd := exec.Command("sops", args...)
-
-	sopsCmd.Stdout = &sopsOut
-	sopsCmd.Stderr = &stderr
+	sopsCmd.Stdout = &passThroughOut
+	sopsCmd.Stderr = &passThroughErr
 
 	err = sopsCmd.Run()
 	if err != nil {
-		fmt.Printf("sops error: %v: %s", err, stderr.String())
+		fmt.Printf("sops error: %v: %s", err, passThroughErr.String())
 		return
 	}
 
-	fmt.Print(sopsOut.String())
+	fmt.Print(passThroughOut.String())
 }
