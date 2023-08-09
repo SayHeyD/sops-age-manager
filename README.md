@@ -56,7 +56,7 @@ Make sure to set the active key before using sam,
 if not sops will return an error and sam will return the following error.
 
 ```
-Could not find encryption key ""
+Could not find decryption key ""
 Could not find encryption key ""
 ```
 
