@@ -27,6 +27,9 @@ by using the private or public key.
 
 Run the program without flags or subcommands to launch the app as a tray-icon.
 
+Use the base command with '--' after which you can execute what you want. 
+The sops configuration will be applied automatically.
+
 GitHub: https://github.com/SayHeyD/sops-age-manager`,
 		Run: func(cmd *cobra.Command, args []string) {
 			executeSops(args)
@@ -54,7 +57,7 @@ func init() {
 func executeSops(args []string) {
 	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
-		log.Fatalf("execute sops: %v", err)
+		log.Fatalf("loading config: %v", err)
 	}
 
 	if len(args) == 0 {
@@ -85,31 +88,47 @@ func executeSops(args []string) {
 	if wantedEncryptionKey == nil {
 		log.Printf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
 	} else {
-		err = os.Setenv("SOPS_AGE_KEY", wantedEncryptionKey.PrivateKey)
+		for index, arg := range args {
+			if arg == "sops" {
+				argsUntilSops := make([]string, len(args[:index+1]))
+				argsAfterSops := make([]string, len(args[index+1:]))
+
+				copy(argsUntilSops, args[:index+1])
+				copy(argsAfterSops, args[index+1:])
+
+				firstArgHalf := append(argsUntilSops, "--age", wantedEncryptionKey.PublicKey)
+				args = append(firstArgHalf, argsAfterSops...)
+			}
+		}
+
+	}
+
+	if wantedDecryptionKey == nil {
+		log.Printf("Could not find decryption key \"%s\"", appConfig.DecryptionKeyName)
+	} else {
+		err = os.Setenv("SOPS_AGE_KEY", wantedDecryptionKey.PrivateKey)
 		if err != nil {
 			log.Fatalf("could not set env variable: %v", err)
 		}
 	}
 
-	if wantedDecryptionKey == nil {
-		log.Printf("Could not find encryption key \"%s\"", appConfig.DecryptionKeyName)
+	if len(args) > 0 {
+		var passThroughOut bytes.Buffer
+		var passThroughErr bytes.Buffer
+
+		sopsCmd := exec.Command(args[0], args[1:]...)
+
+		sopsCmd.Stdout = &passThroughOut
+		sopsCmd.Stderr = &passThroughErr
+
+		err = sopsCmd.Run()
+		if err != nil {
+			fmt.Printf("sops error: %v: %s", err, passThroughErr.String())
+			return
+		}
+
+		fmt.Print(passThroughOut.String())
 	} else {
-		args = append([]string{"--age", wantedDecryptionKey.PublicKey}, args...)
+		log.Fatalf("No command arguments supplied, exiting")
 	}
-
-	var sopsOut bytes.Buffer
-	var stderr bytes.Buffer
-
-	sopsCmd := exec.Command("sops", args...)
-
-	sopsCmd.Stdout = &sopsOut
-	sopsCmd.Stderr = &stderr
-
-	err = sopsCmd.Run()
-	if err != nil {
-		fmt.Printf("sops error: %v: %s", err, stderr.String())
-		return
-	}
-
-	fmt.Print(sopsOut.String())
 }
