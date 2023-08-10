@@ -20,82 +20,64 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/workflows/common/go-setup
-      - name: Build macos amd64
-        run: GOARCH=amd64 GOOS=darwin go build -tags main -o bin/sam_darwin_amd64 .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Build
+        uses: ./.github/workflows/common/go-build
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: bin/*
+          GOOS: darwin
+          GOARCH: amd64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-macos-arm64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/workflows/common/go-setup
-      - name: Build macos arm64
-        run: GOARCH=arm64 GOOS=darwin go build -tags main -o bin/sam_darwin_arm64 .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Build
+        uses: ./.github/workflows/common/go-build
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: bin/*
+          GOOS: darwin
+          GOARCH: arm64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-linux-amd64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/workflows/common/go-setup
-      - name: Build linux amd64
-        run: GOARCH=amd64 GOOS=linux go build -tags main -o bin/sam_linux_amd64 .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Build
+        uses: ./.github/workflows/common/go-build
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: bin/*
+          GOOS: linux
+          GOARCH: amd64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-linux-arm64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/workflows/common/go-setup
-      - name: Build linux arm64
-        run: GOARCH=arm64 GOOS=linux go build -tags main -o bin/sam_linux_arm64 .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Build
+        uses: ./.github/workflows/common/go-build
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: bin/*
+          GOOS: darwin
+          GOARCH: arm64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-windows-amd64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/workflows/common/go-setup
-      - name: Build windows amd64
-        run: GOARCH=amd64 GOOS=windows go build -tags main -o bin/sam_windows_amd64.exe .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Build
+        uses: ./.github/workflows/common/go-build
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: bin/*
+          GOOS: windows
+          GOARCH: amd64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-windows-arm64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup
-        uses: ./.github/workflows/common/go-setup
-      - name: Build windows arm64
-        run: GOARCH=arm64 GOOS=windows go build -tags main -o bin/sam_windows_arm64.exe .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
+      - name: Build
+        uses: ./.github/workflows/common/go-build
         with:
-          name: ${{ env.ARTIFACT_NAME }}
-          path: bin/*
+          GOOS: darwin
+          GOARCH: arm64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
