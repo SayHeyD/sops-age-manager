@@ -104,19 +104,23 @@ func executeSops(args []string) {
 		}
 	}
 
-	var passThroughOut bytes.Buffer
-	var passThroughErr bytes.Buffer
+	if len(args) > 0 {
+		var passThroughOut bytes.Buffer
+		var passThroughErr bytes.Buffer
 
-	sopsCmd := exec.Command(args[0], args[1:]...)
+		sopsCmd := exec.Command(args[0], args[1:]...)
 
-	sopsCmd.Stdout = &passThroughOut
-	sopsCmd.Stderr = &passThroughErr
+		sopsCmd.Stdout = &passThroughOut
+		sopsCmd.Stderr = &passThroughErr
 
-	err = sopsCmd.Run()
-	if err != nil {
-		fmt.Printf("sops error: %v: %s", err, passThroughErr.String())
-		return
+		err = sopsCmd.Run()
+		if err != nil {
+			fmt.Printf("sops error: %v: %s", err, passThroughErr.String())
+			return
+		}
+
+		fmt.Print(passThroughOut.String())
+	} else {
+		log.Fatalf("No command arguments supplied, exiting")
 	}
-
-	fmt.Print(passThroughOut.String())
 }
