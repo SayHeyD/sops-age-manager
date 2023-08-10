@@ -60,5 +60,9 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 		log.Fatalf("readKeyFiles: %v", err)
 	}
 
+	if keys == nil {
+		log.Fatalf("readKeyFiles: No keys were found in the the key dir '%s%s'", keyDir, string(os.PathSeparator))
+	}
+
 	return keys
 }
