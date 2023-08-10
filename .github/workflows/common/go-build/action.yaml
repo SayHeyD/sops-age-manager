@@ -1,0 +1,37 @@
+name: "Go build"
+
+description: "Job to build sam for multiple platforms"
+
+inputs:
+  GOARCH:
+    description: 'The CPU architecture for which to build the binaries'
+    default: 'amd64'
+  GOOS:
+    description: 'The Operating system for which to build the binaries'
+    default: 'darwin'
+  ARTIFACT_NAME:
+    description: 'The name of the artifact where the binaries will be uploaded to'
+    default: 'build-versions'
+  ARTIFACT_PATH:
+    description: 'From where the binaries will be uploaded to the artifact'
+    default: 'bin/*'
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup
+      uses: ./.github/workflows/common/go-setup
+
+    - name: Build ${{ inputs.GOOS }} ${{ inputs.GOARCH }}
+      run: |
+        GOARCH=${{ inputs.GOARCH }} GOOS=${{ inputs.GOOS }} go build -tags main \
+        -o bin/sam_${{ inputs.GOOS }}_${{ inputs.GOARCH }}$(if [[ ${{ inputs.GOOS }} == "windows" ]]; then echo ".exe") .
+      shell: bash
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ inputs.ARTIFACT_NAME }}
+        path: bin/*
