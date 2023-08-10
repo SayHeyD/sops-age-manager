@@ -121,7 +121,6 @@ func executeSops(args []string) {
 
 		fmt.Print(passThroughOut.String())
 	} else {
-		fmt.Println("No command arguments supplied, exiting")
-		os.Exit(0)
+		log.Fatalf("No command arguments supplied, exiting")
 	}
 }
