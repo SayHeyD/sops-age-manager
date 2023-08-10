@@ -24,7 +24,7 @@ runs:
     - name: Setup
       uses: ./.github/workflows/common/go-setup
 
-    - name: Build ${{ inputs.GOOS }} ${{ inputs.GOARCH }}
+    - name: Build
       run: |
         GOARCH=${{ inputs.GOARCH }} GOOS=${{ inputs.GOOS }} go build -tags main \
         -o bin/sam_${{ inputs.GOOS }}_${{ inputs.GOARCH }}$(if [[ "${{ inputs.GOOS }}" == "windows" ]]; \
