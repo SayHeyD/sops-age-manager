@@ -1,12 +1,12 @@
 [![Test and Build](https://github.com/SayHeyD/sops-age-manager/actions/workflows/test-and-build.yaml/badge.svg?branch=dev)](https://github.com/SayHeyD/sops-age-manager/actions/workflows/test-and-build.yaml) [![Lint](https://github.com/SayHeyD/sops-age-manager/actions/workflows/lint.yaml/badge.svg)](https://github.com/SayHeyD/sops-age-manager/actions/workflows/lint.yaml?branch=dev)
 
-# sops-age-manager (sam) | in-development
+# sops-age-manager (sam) _in-development_
 
 sam is a tool to easily manage your sops configuration when using multiple age keys.
 This is useful when f.ex. you have a k8s cluster where you have per-namespace decryption keys.
 
 # Table of contents
-- [sops-age-manager (sam)](#sops-age-manager-sam)
+- [sops-age-manager (sam)](#sops-age-manager-sam-in-development)
 - [Table of contents](#table-of-contents)
 - [Why isn't sops enough?](#why-isnt-sops-enough)
 - [What exactly does sam do?](#what-exactly-does-sam-do)
