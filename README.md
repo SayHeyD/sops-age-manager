@@ -1,6 +1,6 @@
 [![Test and Build](https://github.com/SayHeyD/sops-age-manager/actions/workflows/test-and-build.yaml/badge.svg?branch=dev)](https://github.com/SayHeyD/sops-age-manager/actions/workflows/test-and-build.yaml) [![Lint](https://github.com/SayHeyD/sops-age-manager/actions/workflows/lint.yaml/badge.svg)](https://github.com/SayHeyD/sops-age-manager/actions/workflows/lint.yaml?branch=dev)
 
-# sops-age-manager (sam)
+# sops-age-manager (sam) | in-development
 
 sam is a tool to easily manage your sops configuration when using multiple age keys.
 This is useful when f.ex. you have a k8s cluster where you have per-namespace decryption keys.
@@ -25,24 +25,23 @@ Both options are rather cumbersome when having to change keys frequently.
 
 # What exactly does sam do?
 
-sam provides a configurable layer on top of sops. This means sam is basically a wrapper for sops when using age keys.
-you can configure which key to use by name and execute sops commands with the configured key. In addition, sam also 
-provides some small helper commands to manage and access your key data.
+sam provides a configurable layer on top of sops. This means sam is a 
+wrapper for sops itself and other applications that use sops under the hood. f.ex. 
+the sops terraform provider. 
 
 # User guide
 
 ## Prerequisites
 
-sam requires [sops](https://github.com/mozilla/sops) to be installed before it can be used.
-If sops is not installed everything still works as expected aside from the base command, which passes
-its args to sops. sam also requires sops to be in the PATH.
+sam doesn't directly require [sops](https://github.com/mozilla/sops) to be installed
+before it can be used but without it, sam is kinda useless.
 
 [age](https://github.com/FiloSottile/age) isn't per se a requirement, 
 but you will already need to have age keys to use sam. Sam will not create age keys for you.
 
 ## General
 
-After installation add the age key files to the following path ```$HOME/.age/```. sam will detect age keys
+After installation, add the age key files to the following path ```$HOME/.age/```. sam will detect age keys
 in this directory automatically by default. The filename should follow the following format: ```<KEY_NAME>.txt```.
 
 The default config file for sam will be created at ```$HOME/.sops-age-manager/config.yaml``` on first usage of sam
