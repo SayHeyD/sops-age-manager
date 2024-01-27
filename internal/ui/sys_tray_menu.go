@@ -14,53 +14,53 @@ func CreateSysTrayMenu(a fyne.App, keys []*key.Key, config *config.Config) {
 
 	for _, ageKey := range keys {
 
-		menuKey := *ageKey
+		selectedKey := *ageKey
 
 		ageKeyEncryptionDecryptionMenuEntry := fyne.NewMenuItem("Encryption and decryption", func() {
-			menuKey.SetActiveDecryption()
-			menuKey.SetActiveEncryption()
+			selectedKey.SetActiveDecryption()
+			selectedKey.SetActiveEncryption()
 		})
 
 		ageKeyEncryptionMenuEntry := fyne.NewMenuItem("Encryption", func() {
-			menuKey.SetActiveEncryption()
+			selectedKey.SetActiveEncryption()
 		})
 
 		ageKeyDecryptionMenuEntry := fyne.NewMenuItem("Decryption", func() {
-			menuKey.SetActiveDecryption()
+			selectedKey.SetActiveDecryption()
 		})
 
-		if config.DecryptionKeyName == menuKey.Name && config.EncryptionKeyName == menuKey.Name {
+		if config.DecryptionKeyName == selectedKey.Name && config.EncryptionKeyName == selectedKey.Name {
 			ageKeyEncryptionDecryptionMenuEntry.Checked = true
 		}
 
-		if config.EncryptionKeyName == menuKey.Name && config.DecryptionKeyName != menuKey.Name {
+		if config.EncryptionKeyName == selectedKey.Name && config.DecryptionKeyName != selectedKey.Name {
 			ageKeyEncryptionDecryptionMenuEntry.Checked = true
 		}
 
-		if config.EncryptionKeyName != menuKey.Name && config.DecryptionKeyName == menuKey.Name {
+		if config.EncryptionKeyName != selectedKey.Name && config.DecryptionKeyName == selectedKey.Name {
 			ageKeyEncryptionDecryptionMenuEntry.Checked = true
 		}
 
-		ageKeyMenu := fyne.NewMenuItem(menuKey.Name, func() {})
-		ageKeyMenu.ChildMenu = fyne.NewMenu("key options for "+menuKey.Name,
+		ageKeyMenu := fyne.NewMenuItem(selectedKey.Name, func() {})
+		ageKeyMenu.ChildMenu = fyne.NewMenu("key options for "+selectedKey.Name,
 			ageKeyEncryptionDecryptionMenuEntry,
 			ageKeyEncryptionMenuEntry,
 			ageKeyDecryptionMenuEntry,
 			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("Copy key name", func() {
-				err := clipboard.WriteAll(menuKey.Name)
+				err := clipboard.WriteAll(selectedKey.Name)
 				if err != nil {
 					log.Fatalf("could not set clipboard text: %v", err)
 				}
 			}),
 			fyne.NewMenuItem("Copy public key", func() {
-				err := clipboard.WriteAll(menuKey.PublicKey)
+				err := clipboard.WriteAll(selectedKey.PublicKey)
 				if err != nil {
 					log.Fatalf("could not set clipboard text: %v", err)
 				}
 			}),
 			fyne.NewMenuItem("Copy private key", func() {
-				err := clipboard.WriteAll(menuKey.PrivateKey)
+				err := clipboard.WriteAll(selectedKey.PrivateKey)
 				if err != nil {
 					log.Fatalf("could not set clipboard text: %v", err)
 				}
