@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-/** Hide macos dock application when app is started
+/* // Hide macos dock application when app is started
 #cgo CFLAGS: -x objective-c
 #cgo LDFLAGS: -framework Cocoa
 #import <Cocoa/Cocoa.h>
