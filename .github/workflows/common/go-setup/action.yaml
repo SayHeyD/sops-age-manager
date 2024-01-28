@@ -11,6 +11,10 @@ runs:
       with:
         go-version: '1.21'
 
-    - name: Install dependencies
+    - name: Install build dependencies
+      run: apt install build-essential gcc
+      shell: bash
+
+    - name: Install go dependencies
       run: go get -t ./...
       shell: bash
