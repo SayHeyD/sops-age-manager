@@ -9,37 +9,34 @@ import (
 	"log"
 )
 
+// TODO: restructure the whole file, this reads like spaghetti leftovers of a 3 year old
+
+const (
+	ConfigEncryption           = 0
+	ConfigDecryption           = 1
+	ConfigEncryptionDecryption = 2
+)
+
 func CreateSysTrayMenu(a fyne.App, keys []*key.Key, config *config.Config) {
 	var menuItems []*fyne.MenuItem
+
+	desk, ok := a.(desktop.App)
 
 	for _, ageKey := range keys {
 
 		selectedKey := *ageKey
 
 		ageKeyEncryptionDecryptionMenuEntry := fyne.NewMenuItem("Encryption and decryption", func() {
-			selectedKey.SetActiveDecryption()
-			selectedKey.SetActiveEncryption()
+			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigEncryptionDecryption)
 		})
 
 		ageKeyEncryptionMenuEntry := fyne.NewMenuItem("Encryption", func() {
-			selectedKey.SetActiveEncryption()
+			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigEncryption)
 		})
 
 		ageKeyDecryptionMenuEntry := fyne.NewMenuItem("Decryption", func() {
-			selectedKey.SetActiveDecryption()
+			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigDecryption)
 		})
-
-		if config.DecryptionKeyName == selectedKey.Name && config.EncryptionKeyName == selectedKey.Name {
-			ageKeyEncryptionDecryptionMenuEntry.Checked = true
-		}
-
-		if config.EncryptionKeyName == selectedKey.Name && config.DecryptionKeyName != selectedKey.Name {
-			ageKeyEncryptionDecryptionMenuEntry.Checked = true
-		}
-
-		if config.EncryptionKeyName != selectedKey.Name && config.DecryptionKeyName == selectedKey.Name {
-			ageKeyEncryptionDecryptionMenuEntry.Checked = true
-		}
 
 		ageKeyMenu := fyne.NewMenuItem(selectedKey.Name, func() {})
 		ageKeyMenu.ChildMenu = fyne.NewMenu("key options for "+selectedKey.Name,
@@ -69,11 +66,86 @@ func CreateSysTrayMenu(a fyne.App, keys []*key.Key, config *config.Config) {
 		menuItems = append(menuItems, ageKeyMenu)
 	}
 
-	if desk, ok := a.(desktop.App); ok {
-		keyMenu := fyne.NewMenuItem("Keys", func() {})
-		keyMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
-
-		m := fyne.NewMenu("SAM", keyMenu)
-		desk.SetSystemTrayMenu(m)
+	if ok {
+		setMenu(desk, menuItems)
 	}
+}
+
+func setMenu(desk desktop.App, menuItems []*fyne.MenuItem) {
+	keyMenu := fyne.NewMenuItem("Keys", func() {})
+	keyMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
+
+	m := fyne.NewMenu("SAM", keyMenu)
+	desk.SetSystemTrayMenu(m)
+}
+
+func UpdateSysTrayMenu(desk desktop.App, menuItems []*fyne.MenuItem, key key.Key, setMode uint) {
+
+	samConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	currentEncryptionKey := samConfig.EncryptionKeyName
+	currentDecryptionKey := samConfig.DecryptionKeyName
+
+	for _, menuItem := range menuItems {
+
+		childMenuItems := menuItem.ChildMenu.Items
+
+		for _, childMenuItem := range childMenuItems {
+			childMenuItem.Checked = false
+		}
+
+		if key.Name == menuItem.Label {
+
+			if setMode == ConfigEncryptionDecryption {
+				for _, childMenuItem := range childMenuItems {
+					if childMenuItem.Label == "Encryption and decryption" {
+						childMenuItem.Checked = true
+						key.SetActiveEncryption()
+						key.SetActiveDecryption()
+					} else {
+						childMenuItem.Checked = false
+					}
+				}
+			} else if setMode == ConfigEncryption {
+				for _, childMenuItem := range childMenuItems {
+					if childMenuItem.Label == "Encryption" {
+						childMenuItem.Checked = true
+						key.SetActiveEncryption()
+					} else {
+						childMenuItem.Checked = false
+					}
+				}
+			} else if setMode == ConfigDecryption {
+				for _, childMenuItem := range childMenuItems {
+					if childMenuItem.Label == "Decryption" {
+						childMenuItem.Checked = true
+						key.SetActiveDecryption()
+					} else {
+						childMenuItem.Checked = false
+					}
+				}
+			}
+		}
+
+		if setMode == ConfigEncryption && currentEncryptionKey == menuItem.Label {
+			for _, childMenuItem := range childMenuItems {
+				if childMenuItem.Label == "Decryption" {
+					childMenuItem.Checked = true
+				}
+			}
+		}
+
+		if setMode == ConfigDecryption && currentDecryptionKey == menuItem.Label {
+			for _, childMenuItem := range childMenuItems {
+				if childMenuItem.Label == "Encryption" {
+					childMenuItem.Checked = true
+				}
+			}
+		}
+	}
+
+	setMenu(desk, menuItems)
 }

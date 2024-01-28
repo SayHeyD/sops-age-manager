@@ -27,7 +27,7 @@ func setActivationPolicy() {
 func Init(config *config.Config) {
 	a := app.New()
 
-	keys := key.GetAvailableKeys("")
+	keys := key.GetAvailableKeys(config.KeyDir)
 
 	CreateSysTrayMenu(a, keys, config)
 
