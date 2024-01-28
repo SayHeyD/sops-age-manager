@@ -14,7 +14,7 @@ runs:
     - name: Install ubuntu dev dependencies
       if: matrix.os == 'ubuntu-latest'
       run: |
-        sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev -y
+        sudo apt-get install golang gcc gobjc libgl1-mesa-dev xorg-dev -y
       shell: bash
 
     - name: Install go dependencies
