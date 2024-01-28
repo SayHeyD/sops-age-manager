@@ -18,7 +18,7 @@ SetActivationPolicy(void) {
     return 0;
 }
 */
-import "C"
+import "C" //nolint:typecheck
 
 func setActivationPolicy() {
 	C.SetActivationPolicy()
