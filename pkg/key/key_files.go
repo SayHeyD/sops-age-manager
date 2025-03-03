@@ -21,8 +21,12 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 	}
 
 	if _, err := os.Stat(keyDirPath); os.IsNotExist(err) {
-		log.Fatalf("key directory does not exist: %v", keyDirPath)
-		return nil
+		log.Printf("key directory does not exist: %v\n", keyDirPath)
+		log.Printf("creating key directory: %v\n", keyDirPath)
+
+		if err := os.Mkdir(keyDirPath, 0700); err != nil {
+			log.Fatalf("cannot create the key directory '%s': %v", keyDirPath, err)
+		}
 	}
 
 	keyDir := os.DirFS(keyDirPath)
