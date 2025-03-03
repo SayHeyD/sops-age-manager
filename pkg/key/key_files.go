@@ -20,6 +20,15 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 		keyDirPath = homeDir + string(os.PathSeparator) + ".age"
 	}
 
+	if _, err := os.Stat(keyDirPath); os.IsNotExist(err) {
+		log.Printf("key directory does not exist: %v\n", keyDirPath)
+		log.Printf("creating key directory: %v\n", keyDirPath)
+
+		if err := os.Mkdir(keyDirPath, 0700); err != nil {
+			log.Fatalf("cannot create the key directory '%s': %v", keyDirPath, err)
+		}
+	}
+
 	keyDir := os.DirFS(keyDirPath)
 	err := fs.WalkDir(keyDir, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
