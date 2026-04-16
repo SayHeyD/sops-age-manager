@@ -6,6 +6,7 @@
 *.dylib
 
 /bin
+/build
 /macos-build
 
 # Test binary, built with `go test -c`
