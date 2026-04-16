@@ -1,0 +1,18 @@
+{
+  "source": [
+    "./bin/sam"
+  ],
+  "bundle_id": "ch.davidlab.apps.sam",
+  "apple_id": {
+    "username": "david@docampo.ch",
+    "password":  "@keychain:apple.com",
+    "provider":  "K8J4Q3KC7C"
+  },
+  "sign": {
+    "application_identity": "Developer ID Application: David Docampo"
+  },
+  "dmg": {
+    "output_path":  "./build/sam.dmg",
+    "volume_name":  "Sops Age Manger"
+  }
+}

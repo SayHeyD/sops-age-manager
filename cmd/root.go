@@ -3,20 +3,22 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"github.com/SayHeyD/sops-age-manager/internal/ui"
-	"github.com/SayHeyD/sops-age-manager/pkg/config"
-	"github.com/SayHeyD/sops-age-manager/pkg/key"
-	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"os/exec"
 	"runtime"
+
+	"github.com/SayHeyD/sops-age-manager/internal/ui"
+	"github.com/SayHeyD/sops-age-manager/pkg/config"
+	"github.com/SayHeyD/sops-age-manager/pkg/key"
+	"github.com/spf13/cobra"
 )
 
 var (
 	showVersion bool
 
 	appVersion string
+	appLogo    []byte
 
 	RootCmd = &cobra.Command{
 		Use:   "sam",
@@ -37,8 +39,9 @@ GitHub: https://github.com/SayHeyD/sops-age-manager`,
 	}
 )
 
-func Execute(version string) {
+func Execute(version string, logo []byte) {
 	appVersion = version
+	appLogo = logo
 
 	if err := RootCmd.Execute(); err != nil {
 		log.Fatalf("executing rootCmd: %v", err)
@@ -61,7 +64,7 @@ func executeSops(args []string) {
 	}
 
 	if len(args) == 0 {
-		ui.Init(appConfig)
+		ui.Init(appConfig, appLogo)
 		return
 	}
 

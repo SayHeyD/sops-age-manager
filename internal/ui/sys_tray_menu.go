@@ -1,12 +1,13 @@
 package ui
 
 import (
+	"log"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop" //nolint:typecheck
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
 	"github.com/atotto/clipboard"
-	"log"
 )
 
 // TODO: restructure the whole file, this reads like spaghetti leftovers of a 3 year old
@@ -17,7 +18,7 @@ const (
 	ConfigEncryptionDecryption = 2
 )
 
-func CreateSysTrayMenu(a fyne.App, keys []*key.Key, config *config.Config) {
+func CreateSysTrayMenu(a fyne.App, keys []*key.Key, config *config.Config, logo []byte) {
 	var menuItems []*fyne.MenuItem
 
 	desk, ok := a.(desktop.App)
@@ -27,15 +28,15 @@ func CreateSysTrayMenu(a fyne.App, keys []*key.Key, config *config.Config) {
 		selectedKey := *ageKey
 
 		ageKeyEncryptionDecryptionMenuEntry := fyne.NewMenuItem("Encryption and decryption", func() {
-			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigEncryptionDecryption)
+			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigEncryptionDecryption, logo)
 		})
 
 		ageKeyEncryptionMenuEntry := fyne.NewMenuItem("Encryption", func() {
-			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigEncryption)
+			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigEncryption, logo)
 		})
 
 		ageKeyDecryptionMenuEntry := fyne.NewMenuItem("Decryption", func() {
-			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigDecryption)
+			UpdateSysTrayMenu(desk, menuItems, selectedKey, ConfigDecryption, logo)
 		})
 
 		ageKeyMenu := fyne.NewMenuItem(selectedKey.Name, func() {})
@@ -67,19 +68,22 @@ func CreateSysTrayMenu(a fyne.App, keys []*key.Key, config *config.Config) {
 	}
 
 	if ok {
-		setMenu(desk, menuItems)
+		setMenu(desk, menuItems, logo)
 	}
 }
 
-func setMenu(desk desktop.App, menuItems []*fyne.MenuItem) {
+func setMenu(desk desktop.App, menuItems []*fyne.MenuItem, logo []byte) {
 	keyMenu := fyne.NewMenuItem("Keys", func() {})
 	keyMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
 
 	m := fyne.NewMenu("SAM", keyMenu)
 	desk.SetSystemTrayMenu(m)
+
+	logoResource := fyne.NewStaticResource("Logo.png", logo)
+	desk.SetSystemTrayIcon(logoResource)
 }
 
-func UpdateSysTrayMenu(desk desktop.App, menuItems []*fyne.MenuItem, key key.Key, setMode uint) {
+func UpdateSysTrayMenu(desk desktop.App, menuItems []*fyne.MenuItem, key key.Key, setMode uint, logo []byte) {
 
 	samConfig, err := config.NewConfigFromFile()
 	if err != nil {
@@ -147,5 +151,5 @@ func UpdateSysTrayMenu(desk desktop.App, menuItems []*fyne.MenuItem, key key.Key
 		}
 	}
 
-	setMenu(desk, menuItems)
+	setMenu(desk, menuItems, logo)
 }

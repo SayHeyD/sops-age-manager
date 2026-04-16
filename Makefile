@@ -17,3 +17,6 @@ test:
 clean:
 	@echo "Cleaning build products... 🔄"
 	@rm -f ./bin/sam* && echo "Cleaning done ✅" || (echo echo "Cleaning failed ❌"; exit 1)
+
+dmg:
+	@./macos_build.sh
