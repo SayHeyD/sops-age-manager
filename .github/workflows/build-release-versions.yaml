@@ -1,0 +1,83 @@
+name: "Build release versions"
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+      - beta
+      - dev
+  pull_request:
+    branches:
+      - main
+      - beta
+
+env:
+  ARTIFACT_NAME: sam-builds-${{ github.sha }}
+
+jobs:
+  build-macos-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/workflows/common/go-build
+        with:
+          GOOS: darwin
+          GOARCH: amd64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
+
+  build-macos-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/workflows/common/go-build
+        with:
+          GOOS: darwin
+          GOARCH: arm64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
+
+  build-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/workflows/common/go-build
+        with:
+          GOOS: linux
+          GOARCH: amd64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
+
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/workflows/common/go-build
+        with:
+          GOOS: linux
+          GOARCH: arm64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
+
+  build-windows-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/workflows/common/go-build
+        with:
+          GOOS: windows
+          GOARCH: amd64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
+
+  build-windows-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        uses: ./.github/workflows/common/go-build
+        with:
+          GOOS: windows
+          GOARCH: arm64
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}

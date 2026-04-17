@@ -14,10 +14,19 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 	if keyDirPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			log.Fatal(fmt.Sprintf("cannot get the users home directory: %v", err))
+			log.Fatalf("cannot get the users home directory: %v", err)
 		}
 
 		keyDirPath = homeDir + string(os.PathSeparator) + ".age"
+	}
+
+	if _, err := os.Stat(keyDirPath); os.IsNotExist(err) {
+		log.Printf("key directory does not exist: %v\n", keyDirPath)
+		log.Printf("creating key directory: %v\n", keyDirPath)
+
+		if err := os.Mkdir(keyDirPath, 0700); err != nil {
+			log.Fatalf("cannot create the key directory '%s': %v", keyDirPath, err)
+		}
 	}
 
 	keyDir := os.DirFS(keyDirPath)
@@ -44,7 +53,7 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 			return err
 		}
 
-		key := NewKey(keyName, string(keyFileContent))
+		key := NewKey(keyName, fullPath, string(keyFileContent))
 
 		for _, processedKey := range keys {
 			if key.Name == processedKey.Name {
@@ -57,7 +66,11 @@ func GetAvailableKeys(keyDirPath string) []*Key {
 		return nil
 	})
 	if err != nil {
-		log.Fatal(fmt.Sprintf("readKeyFiles: %v", err))
+		log.Fatalf("reading key files: %v", err)
+	}
+
+	if keys == nil {
+		log.Fatalf("reading key files: No keys were found in the the key dir '%s%s'", keyDir, string(os.PathSeparator))
 	}
 
 	return keys
