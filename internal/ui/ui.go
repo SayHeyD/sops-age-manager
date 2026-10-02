@@ -1,12 +1,11 @@
 //go:build darwin
-// +build darwin
 
 package ui
 
 import (
 	"time"
 
-	"githops-age-manager/pkg/key"
+	"github.com/SayHeyD/sops-age-manager/pkg/key"
 
 	"fyne.io/fyne/v2/app"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
