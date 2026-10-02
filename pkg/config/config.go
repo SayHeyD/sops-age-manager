@@ -83,12 +83,6 @@ func (c *Config) Raw() (string, error) {
 }
 
 func (c *Config) Write() error {
-	configFile, err := os.Create(getConfigFilePath())
-	if err != nil {
-		return fmt.Errorf("could not create the config file: %v", err)
-	}
-	defer configFile.Close()
-
 	configFileContentBytes, err := yaml.Marshal(c)
 	if err != nil {
 		return fmt.Errorf("could not marshal config: %v", err)
@@ -96,8 +90,7 @@ func (c *Config) Write() error {
 
 	trimmedConfigFileContentBytes := strings.Trim(string(configFileContentBytes), "\t\n ")
 
-	_, err = configFile.WriteString(trimmedConfigFileContentBytes)
-	if err != nil {
+	if err := os.WriteFile(getConfigFilePath(), []byte(trimmedConfigFileContentBytes), 0666); err != nil {
 		return fmt.Errorf("could not write to config: %v", err)
 	}
 
@@ -133,15 +126,8 @@ func getConfigFileContents(path string) ([]byte, error) {
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		configFile, err := os.Create(path)
-		if err != nil {
+		if err := os.WriteFile(path, []byte(defaultConfig), 0666); err != nil {
 			return nil, fmt.Errorf("trying to create the config file: %v", err)
-		}
-		defer configFile.Close()
-
-		_, err = configFile.WriteString(defaultConfig)
-		if err != nil {
-			return nil, fmt.Errorf("trying write to the config file: %v", err)
 		}
 
 		return []byte(defaultConfig), nil
