@@ -13,16 +13,20 @@ import (
 
 type mockFyneDesktopApp struct {
 	fyne.App
-	menu *fyne.Menu
-	icon fyne.Resource
+	menu          *fyne.Menu
+	icon          fyne.Resource
+	menuCallCount int
+	iconCallCount int
 }
 
 func (m *mockFyneDesktopApp) SetSystemTrayMenu(menu *fyne.Menu) {
 	m.menu = menu
+	m.menuCallCount++
 }
 
 func (m *mockFyneDesktopApp) SetSystemTrayIcon(icon fyne.Resource) {
 	m.icon = icon
+	m.iconCallCount++
 }
 
 func TestCreateSysTrayMenuWithDesktopApp(t *testing.T) {
@@ -53,6 +57,13 @@ func TestCreateSysTrayMenuWithDesktopApp(t *testing.T) {
 
 	if deskApp.icon == nil || deskApp.icon.Name() != "Logo.png" {
 		t.Errorf("expected icon 'Logo.png', got %v", deskApp.icon)
+	}
+
+	if deskApp.menuCallCount != 1 {
+		t.Errorf("expected SetSystemTrayMenu to be called exactly 1 time, got %d", deskApp.menuCallCount)
+	}
+	if deskApp.iconCallCount != 1 {
+		t.Errorf("expected SetSystemTrayIcon to be called exactly 1 time, got %d", deskApp.iconCallCount)
 	}
 }
 

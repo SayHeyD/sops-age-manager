@@ -14,16 +14,20 @@ import (
 )
 
 type mockDesktopApp struct {
-	menu *fyne.Menu
-	icon fyne.Resource
+	menu          *fyne.Menu
+	icon          fyne.Resource
+	menuCallCount int
+	iconCallCount int
 }
 
 func (m *mockDesktopApp) SetSystemTrayMenu(menu *fyne.Menu) {
 	m.menu = menu
+	m.menuCallCount++
 }
 
 func (m *mockDesktopApp) SetSystemTrayIcon(icon fyne.Resource) {
 	m.icon = icon
+	m.iconCallCount++
 }
 
 func setupTestConfig(t *testing.T, encKey, decKey string) func() {
@@ -123,6 +127,22 @@ func TestTrayManagerRefresh(t *testing.T) {
 
 	if desk.icon == nil || desk.icon.Name() != "Logo.png" {
 		t.Errorf("expected tray icon 'Logo.png', got %v", desk.icon)
+	}
+
+	if desk.menuCallCount != 1 {
+		t.Errorf("expected SetSystemTrayMenu to be called exactly 1 time, got %d", desk.menuCallCount)
+	}
+	if desk.iconCallCount != 1 {
+		t.Errorf("expected SetSystemTrayIcon to be called exactly 1 time, got %d", desk.iconCallCount)
+	}
+
+	// Calling Refresh again should update checkmarks in-place without re-calling SetSystemTrayMenu
+	tm.Refresh()
+	if desk.menuCallCount != 1 {
+		t.Errorf("expected SetSystemTrayMenu count to remain 1 after second Refresh, got %d", desk.menuCallCount)
+	}
+	if desk.iconCallCount != 1 {
+		t.Errorf("expected SetSystemTrayIcon count to remain 1 after second Refresh, got %d", desk.iconCallCount)
 	}
 }
 

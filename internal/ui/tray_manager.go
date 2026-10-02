@@ -14,6 +14,7 @@ import (
 type TrayManager struct {
 	desk    desktop.App
 	entries []*keyEntry
+	menu    *fyne.Menu
 	logo    []byte
 	watcher *ConfigWatcher
 }
@@ -27,6 +28,23 @@ func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager
 	tm.entries = make([]*keyEntry, len(keys))
 	for i, k := range keys {
 		tm.entries[i] = newKeyEntry(k, tm.handleModeSelection)
+	}
+
+	menuItems := make([]*fyne.MenuItem, len(tm.entries))
+	for i, entry := range tm.entries {
+		menuItems[i] = entry.menuItem
+	}
+
+	keySubMenu := fyne.NewMenuItem("Keys", func() {})
+	keySubMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
+
+	tm.menu = fyne.NewMenu("SAM", keySubMenu)
+
+	if tm.desk != nil {
+		tm.desk.SetSystemTrayMenu(tm.menu)
+		if len(tm.logo) > 0 {
+			tm.desk.SetSystemTrayIcon(fyne.NewStaticResource("Logo.png", tm.logo))
+		}
 	}
 
 	return tm
@@ -54,19 +72,8 @@ func (tm *TrayManager) Refresh() {
 		entry.updateChecked(appConfig.EncryptionKeyName, appConfig.DecryptionKeyName)
 	}
 
-	menuItems := make([]*fyne.MenuItem, len(tm.entries))
-	for i, entry := range tm.entries {
-		menuItems[i] = entry.menuItem
-	}
-
-	keySubMenu := fyne.NewMenuItem("Keys", func() {})
-	keySubMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
-
-	samMenu := fyne.NewMenu("SAM", keySubMenu)
-	tm.desk.SetSystemTrayMenu(samMenu)
-
-	if len(tm.logo) > 0 {
-		tm.desk.SetSystemTrayIcon(fyne.NewStaticResource("Logo.png", tm.logo))
+	if tm.menu != nil {
+		tm.menu.Refresh()
 	}
 }
 
