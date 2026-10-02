@@ -21,7 +21,7 @@ jobs:
         uses: ./.github/workflows/common/go-setup
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v9
         with:
           version: latest
           args: -v --print-issued-lines
