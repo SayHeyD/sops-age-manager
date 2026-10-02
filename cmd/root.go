@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -115,21 +114,17 @@ func executeSops(args []string) {
 	}
 
 	if len(args) > 0 {
-		var passThroughOut bytes.Buffer
-		var passThroughErr bytes.Buffer
-
 		sopsCmd := exec.Command(args[0], args[1:]...)
 
-		sopsCmd.Stdout = &passThroughOut
-		sopsCmd.Stderr = &passThroughErr
+		sopsCmd.Stdout = os.Stdout
+		sopsCmd.Stderr = os.Stderr
+		sopsCmd.Stdin = os.Stdin
 
 		err = sopsCmd.Run()
 		if err != nil {
-			fmt.Printf("sops error: %v: %s", err, passThroughErr.String())
-			return
+			fmt.Printf("sops error: %v\n", err)
+			os.Exit(1)
 		}
-
-		fmt.Print(passThroughOut.String())
 	} else {
 		log.Fatalf("No command arguments supplied, exiting")
 	}

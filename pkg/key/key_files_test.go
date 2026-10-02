@@ -122,3 +122,11 @@ func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 		}
 	}
 }
+
+func TestGetAvailableKeysCreatesKeyDirIfItDoesNotExist(t *testing.T) {
+	t.Skip()
+	/*
+		TODO: find a way to test this nicely. Currently this results in log.Fatal
+			  which is what we want but it is not really testable
+	*/
+}
