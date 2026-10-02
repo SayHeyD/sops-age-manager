@@ -48,14 +48,20 @@ func setActiveKey(keyName string) {
 
 	for _, ageKey := range keys {
 		if ageKey.Name == keyName {
-			if setDecryptionKey || (!setDecryptionKey && !setEncryptionKey) {
-				ageKey.SetActiveDecryption()
+			if !setDecryptionKey && !setEncryptionKey {
+				ageKey.SetActiveBoth()
 				fmt.Printf("Set \"%s\" as active decryption key\n", ageKey.Name)
-			}
-
-			if setEncryptionKey || (!setDecryptionKey && !setEncryptionKey) {
-				ageKey.SetActiveEncryption()
 				fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
+			} else {
+				if setDecryptionKey {
+					ageKey.SetActiveDecryption()
+					fmt.Printf("Set \"%s\" as active decryption key\n", ageKey.Name)
+				}
+
+				if setEncryptionKey {
+					ageKey.SetActiveEncryption()
+					fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
+				}
 			}
 
 			return

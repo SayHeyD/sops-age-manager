@@ -1,7 +1,11 @@
 package key
 
 import (
+	"path/filepath"
 	"testing"
+
+	"github.com/SayHeyD/sops-age-manager/pkg/config"
+	"github.com/SayHeyD/sops-age-manager/test"
 )
 
 const wantedKeyName = "test_key"
@@ -67,5 +71,59 @@ func TestNewKeyFunctionCreatesKeyWithCorrectPrivateKeyWithoutNewline(t *testing.
 
 	if key.PrivateKey != ageKeyPrivateKey {
 		t.Fatalf("Wanted private key \"%s\" doesn't match with private key on generated key: \"%s\"", ageKeyPrivateKey, key.PrivateKey)
+	}
+}
+
+func TestKeySetActiveFunctions(t *testing.T) {
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	configPath := filepath.Join(testDir.Path, "config.yaml")
+	t.Setenv("SOPS_AGE_MANAGER_CONFIG_DIR", configPath)
+
+	cfg := config.NewConfig("initial-enc", "initial-dec", testDir.Path)
+	if err := cfg.Write(); err != nil {
+		t.Fatalf("could not write initial config: %v", err)
+	}
+
+	targetKey := &Key{Name: "target-key"}
+
+	// SetActiveEncryption
+	targetKey.SetActiveEncryption()
+	loadedCfg, err := config.NewConfigFromFile()
+	if err != nil {
+		t.Fatalf("could not read config: %v", err)
+	}
+	if loadedCfg.EncryptionKeyName != "target-key" || loadedCfg.DecryptionKeyName != "initial-dec" {
+		t.Errorf("unexpected keys after SetActiveEncryption: enc=%s, dec=%s",
+			loadedCfg.EncryptionKeyName, loadedCfg.DecryptionKeyName)
+	}
+
+	// SetActiveDecryption
+	targetKey.SetActiveDecryption()
+	loadedCfg, err = config.NewConfigFromFile()
+	if err != nil {
+		t.Fatalf("could not read config: %v", err)
+	}
+	if loadedCfg.EncryptionKeyName != "target-key" || loadedCfg.DecryptionKeyName != "target-key" {
+		t.Errorf("unexpected keys after SetActiveDecryption: enc=%s, dec=%s",
+			loadedCfg.EncryptionKeyName, loadedCfg.DecryptionKeyName)
+	}
+
+	// Reset and test SetActiveBoth
+	cfg.EncryptionKeyName = "initial-enc"
+	cfg.DecryptionKeyName = "initial-dec"
+	if err := cfg.Write(); err != nil {
+		t.Fatalf("could not reset config: %v", err)
+	}
+
+	targetKey.SetActiveBoth()
+	loadedCfg, err = config.NewConfigFromFile()
+	if err != nil {
+		t.Fatalf("could not read config: %v", err)
+	}
+	if loadedCfg.EncryptionKeyName != "target-key" || loadedCfg.DecryptionKeyName != "target-key" {
+		t.Errorf("unexpected keys after SetActiveBoth: enc=%s, dec=%s",
+			loadedCfg.EncryptionKeyName, loadedCfg.DecryptionKeyName)
 	}
 }

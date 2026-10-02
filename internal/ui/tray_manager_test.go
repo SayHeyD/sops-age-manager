@@ -232,3 +232,55 @@ func TestTrayManagerWatchAndExternalConfigChange(t *testing.T) {
 	tm.StopWatching()
 	tm.StopWatching()
 }
+
+func TestTrayManagerHandleModeSelectionUpdatesViaWatcher(t *testing.T) {
+	cleanup := setupTestConfig(t, "key-1", "key-1")
+	defer cleanup()
+
+	cfg, err := config.NewConfigFromFile()
+	if err != nil {
+		t.Fatalf("could not read config: %v", err)
+	}
+
+	desk := &mockDesktopApp{}
+	key1 := &key.Key{Name: "key-1", PublicKey: "pub1", PrivateKey: "priv1"}
+	key2 := &key.Key{Name: "key-2", PublicKey: "pub2", PrivateKey: "priv2"}
+	keys := []*key.Key{key1, key2}
+
+	tm := NewTrayManager(desk, keys, nil)
+	tm.Refresh()
+
+	if err := tm.StartWatching(cfg.Path); err != nil {
+		t.Fatalf("failed to start watching: %v", err)
+	}
+	defer tm.StopWatching()
+
+	// Initial check: key-1 is both
+	if !tm.entries[0].bothItem.Checked {
+		t.Fatalf("expected key-1 bothItem checked initially")
+	}
+
+	// Trigger UI click on key2 encryption
+	tm.entries[1].encryptionItem.Action()
+
+	// Wait for watcher to trigger refresh
+	time.Sleep(200 * time.Millisecond)
+
+	if !tm.entries[1].encryptionItem.Checked || tm.entries[1].bothItem.Checked {
+		t.Errorf("expected key-2 to be encryption only via watcher, got enc=%v, both=%v",
+			tm.entries[1].encryptionItem.Checked, tm.entries[1].bothItem.Checked)
+	}
+	if !tm.entries[0].decryptionItem.Checked || tm.entries[0].bothItem.Checked {
+		t.Errorf("expected key-1 to be decryption only via watcher, got dec=%v, both=%v",
+			tm.entries[0].decryptionItem.Checked, tm.entries[0].bothItem.Checked)
+	}
+
+	// Trigger UI click on key2 both
+	tm.entries[1].bothItem.Action()
+	time.Sleep(200 * time.Millisecond)
+
+	if !tm.entries[1].bothItem.Checked || tm.entries[0].bothItem.Checked {
+		t.Errorf("expected key-2 to be both via watcher, got key2 both=%v, key1 both=%v",
+			tm.entries[1].bothItem.Checked, tm.entries[0].bothItem.Checked)
+	}
+}

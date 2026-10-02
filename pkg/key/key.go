@@ -69,3 +69,17 @@ func (k *Key) SetActiveDecryption() {
 		log.Fatalf("Could not write application config: %v", err)
 	}
 }
+
+func (k *Key) SetActiveBoth() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.EncryptionKeyName = k.Name
+	appConfig.DecryptionKeyName = k.Name
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}

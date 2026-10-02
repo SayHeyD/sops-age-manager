@@ -35,15 +35,12 @@ func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager
 func (tm *TrayManager) handleModeSelection(k *key.Key, mode KeyMode) {
 	switch mode {
 	case ModeBoth:
-		k.SetActiveEncryption()
-		k.SetActiveDecryption()
+		k.SetActiveBoth()
 	case ModeEncryption:
 		k.SetActiveEncryption()
 	case ModeDecryption:
 		k.SetActiveDecryption()
 	}
-
-	tm.Refresh()
 }
 
 func (tm *TrayManager) Refresh() {
