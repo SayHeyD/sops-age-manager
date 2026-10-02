@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Preparing .app directory... 🔄"
+rm -rf ./build
 mkdir -p ./build
 mkdir -p ./build/icons.iconset
 mkdir -p ./build/SAM.app/Contents/MacOS
