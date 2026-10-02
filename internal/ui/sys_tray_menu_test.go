@@ -38,7 +38,10 @@ func TestCreateSysTrayMenuWithDesktopApp(t *testing.T) {
 	cfg := config.NewConfig("key-1", "key-2", "")
 	logo := []byte("logo-bytes")
 
-	CreateSysTrayMenu(deskApp, keys, cfg, logo)
+	tm := CreateSysTrayMenu(deskApp, keys, cfg, logo)
+	if tm != nil {
+		defer tm.StopWatching()
+	}
 
 	if deskApp.menu == nil {
 		t.Fatal("expected menu to be created and set")

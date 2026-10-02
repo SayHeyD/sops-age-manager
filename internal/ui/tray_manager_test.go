@@ -5,6 +5,7 @@ package ui
 import (
 	"os"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
@@ -165,4 +166,69 @@ func TestTrayManagerHandleModeSelection(t *testing.T) {
 		t.Errorf("expected both keys 'test-target', got enc='%s', dec='%s'",
 			cfg.EncryptionKeyName, cfg.DecryptionKeyName)
 	}
+}
+
+func TestTrayManagerWatchAndExternalConfigChange(t *testing.T) {
+	cleanup := setupTestConfig(t, "key-1", "key-1")
+	defer cleanup()
+
+	cfg, err := config.NewConfigFromFile()
+	if err != nil {
+		t.Fatalf("could not read config: %v", err)
+	}
+
+	desk := &mockDesktopApp{}
+	key1 := &key.Key{Name: "key-1", PublicKey: "pub1", PrivateKey: "priv1"}
+	key2 := &key.Key{Name: "key-2", PublicKey: "pub2", PrivateKey: "priv2"}
+	keys := []*key.Key{key1, key2}
+
+	tm := NewTrayManager(desk, keys, nil)
+	tm.Refresh()
+
+	if err := tm.StartWatching(cfg.Path); err != nil {
+		t.Fatalf("failed to start watching: %v", err)
+	}
+	defer tm.StopWatching()
+
+	// Initially key-1 is both encryption and decryption
+	if !tm.entries[0].bothItem.Checked || tm.entries[1].bothItem.Checked {
+		t.Fatalf("unexpected initial state: entry0 both=%v, entry1 both=%v",
+			tm.entries[0].bothItem.Checked, tm.entries[1].bothItem.Checked)
+	}
+
+	// External CLI updates config to key-2 for decryption
+	cfg.DecryptionKeyName = "key-2"
+	if err := cfg.Write(); err != nil {
+		t.Fatalf("could not write updated config: %v", err)
+	}
+
+	// Wait for watcher to trigger refresh
+	time.Sleep(200 * time.Millisecond)
+
+	// Verify key-1 is now encryption only, and key-2 is decryption only
+	if !tm.entries[0].encryptionItem.Checked || tm.entries[0].bothItem.Checked {
+		t.Errorf("expected entry0 to be encryption only, got enc=%v, both=%v",
+			tm.entries[0].encryptionItem.Checked, tm.entries[0].bothItem.Checked)
+	}
+	if !tm.entries[1].decryptionItem.Checked || tm.entries[1].bothItem.Checked {
+		t.Errorf("expected entry1 to be decryption only, got dec=%v, both=%v",
+			tm.entries[1].decryptionItem.Checked, tm.entries[1].bothItem.Checked)
+	}
+
+	// External CLI updates config to key-2 for both
+	cfg.EncryptionKeyName = "key-2"
+	if err := cfg.Write(); err != nil {
+		t.Fatalf("could not write updated config: %v", err)
+	}
+
+	time.Sleep(200 * time.Millisecond)
+
+	if !tm.entries[1].bothItem.Checked || tm.entries[0].bothItem.Checked || tm.entries[0].encryptionItem.Checked {
+		t.Errorf("expected entry1 to be both, got entry0 enc=%v, entry1 both=%v",
+			tm.entries[0].encryptionItem.Checked, tm.entries[1].bothItem.Checked)
+	}
+
+	// Stop watching idempotency
+	tm.StopWatching()
+	tm.StopWatching()
 }

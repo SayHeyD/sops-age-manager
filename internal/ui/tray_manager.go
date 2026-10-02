@@ -15,6 +15,7 @@ type TrayManager struct {
 	desk    desktop.App
 	entries []*keyEntry
 	logo    []byte
+	watcher *ConfigWatcher
 }
 
 func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager {
@@ -69,5 +70,26 @@ func (tm *TrayManager) Refresh() {
 
 	if len(tm.logo) > 0 {
 		tm.desk.SetSystemTrayIcon(fyne.NewStaticResource("Logo.png", tm.logo))
+	}
+}
+
+func (tm *TrayManager) StartWatching(configPath string) error {
+	if tm.watcher != nil {
+		tm.watcher.Stop()
+	}
+
+	watcher, err := NewConfigWatcher(configPath, tm.Refresh)
+	if err != nil {
+		return err
+	}
+
+	tm.watcher = watcher
+	return nil
+}
+
+func (tm *TrayManager) StopWatching() {
+	if tm.watcher != nil {
+		tm.watcher.Stop()
+		tm.watcher = nil
 	}
 }
