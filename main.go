@@ -13,7 +13,7 @@ import (
 //go:embed version.txt
 var versionFile embed.FS
 
-//go:embed Logo.png
+//go:embed assets/Logo.png
 var logoFile []byte
 
 func main() {
