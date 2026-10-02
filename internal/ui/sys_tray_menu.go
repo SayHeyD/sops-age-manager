@@ -1,3 +1,6 @@
+//go:build darwin
+// +build darwin
+
 package ui
 
 import (

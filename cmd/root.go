@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/SayHeyD/sops-age-manager/internal/ui"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
 	"github.com/spf13/cobra"
@@ -64,7 +63,7 @@ func executeSops(args []string) {
 	}
 
 	if len(args) == 0 {
-		ui.Init(appConfig, appLogo)
+		launchUI(appConfig, appLogo)
 		return
 	}
 

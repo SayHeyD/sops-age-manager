@@ -18,7 +18,7 @@ func getTestBaseDir(t *testing.T) string {
 	dir := tmpDir + "sops-age-manager"
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		if err := os.Mkdir(dir, os.ModePerm); err != nil {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
 			t.Fatalf("Could not create testing directories: %v", err)
 		}
 	} else if err != nil {

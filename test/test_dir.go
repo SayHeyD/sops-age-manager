@@ -16,7 +16,7 @@ func GenerateNewUniqueTestDir(t *testing.T) *Dir {
 	testDir := getTestBaseDir(t) + string(os.PathSeparator) + uuid.NewString()
 
 	if _, err := os.Stat(testDir); os.IsNotExist(err) {
-		if err := os.Mkdir(testDir, os.ModePerm); err != nil {
+		if err := os.MkdirAll(testDir, os.ModePerm); err != nil {
 			t.Fatalf("Could not create testing directories: %v", err)
 		}
 	} else if err != nil {

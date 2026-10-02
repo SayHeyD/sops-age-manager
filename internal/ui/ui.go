@@ -1,14 +1,16 @@
+//go:build darwin
+// +build darwin
+
 package ui
 
 import (
 	"time"
 
+	"githops-age-manager/pkg/key"
+
 	"fyne.io/fyne/v2/app"
 	"github.com/SayHeyD/sops-age-manager/pkg/config"
-	"github.com/SayHeyD/sops-age-manager/pkg/key"
 )
-
-// TODO: runt his only on macos
 
 /* // Hide macos dock application when app is started
 #cgo CFLAGS: -x objective-c

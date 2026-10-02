@@ -1,4 +1,4 @@
-.PHONY: test
+.PHONY: test build docs clean dmg
 
 build:
 	@echo "Building application... 🔄"
