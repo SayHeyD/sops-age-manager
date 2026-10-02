@@ -5,6 +5,8 @@
 *.so
 *.dylib
 
+.idea/php.xml
+
 /bin
 /build
 /macos-build
