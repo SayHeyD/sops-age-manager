@@ -1,115 +1,193 @@
 [![Test and Build](https://github.com/SayHeyD/sops-age-manager/actions/workflows/test-and-build.yaml/badge.svg?branch=dev)](https://github.com/SayHeyD/sops-age-manager/actions/workflows/test-and-build.yaml) [![Lint](https://github.com/SayHeyD/sops-age-manager/actions/workflows/lint.yaml/badge.svg)](https://github.com/SayHeyD/sops-age-manager/actions/workflows/lint.yaml?branch=dev)
 
-# sops-age-manager (sam) _in-development_
+# sops-age-manager (sam)
 
-sam is a tool to easily manage your sops configuration when using multiple age keys.
-This is useful when f.ex. you have a k8s cluster where you have per-namespace decryption keys.
+**sam** is a cross-platform tool and system tray utility designed to seamlessly manage your [sops](https://github.com/getsops/sops) configuration when working with multiple [age](https://github.com/FiloSottile/age) encryption keys.
 
-# Table of contents
-- [sops-age-manager (sam)](#sops-age-manager-sam-in-development)
-- [Table of contents](#table-of-contents)
-- [Why isn't sops enough?](#why-isnt-sops-enough)
-- [What exactly does sam do?](#what-exactly-does-sam-do)
-- [User guide](#user-guide)
+It eliminates the friction of manually passing `--age` recipient keys or managing `SOPS_AGE_KEY` environment variables when switching between multiple environments, teams, or Kubernetes namespaces.
+
+---
+
+## Table of Contents
+- [Why isn't SOPS enough?](#why-isnt-sops-enough)
+- [What does SAM do?](#what-does-sam-do)
+- [Features](#features)
+- [System Tray UI](#system-tray-ui)
+- [User Guide](#user-guide)
   - [Prerequisites](#prerequisites)
-  - [General](#general)
   - [Installation](#installation)
-  - [Commands](#commands)
-  - [Configuration](#configuration)
+  - [Key Directory Setup](#key-directory-setup)
+- [CLI Commands & Usage](#cli-commands--usage)
+  - [Basic SOPS Execution](#basic-sops-execution)
+  - [Key Management Commands](#key-management-commands)
+  - [Configuration Commands](#configuration-commands)
+  - [Command Documentation](#command-documentation)
+- [Configuration](#configuration)
 
-# Why isn't sops enough?
+---
 
-With the tooling that sops provides currently, changing the configured age key required entering the public key
-as an argument with every operation or defining an environment variable with the private key of the key to use.
-Both options are rather cumbersome when having to change keys frequently.
+## Why isn't SOPS enough?
 
-# What exactly does sam do?
+With standard SOPS tooling, switching age keys requires either passing the full public recipient key (`age1...`) as a command-line argument for every operation or setting the `SOPS_AGE_KEY` environment variable with the corresponding private key. 
 
-sam provides a configurable layer on top of sops. This means sam is a 
-wrapper for sops itself and other applications that use sops under the hood. f.ex. 
-the sops terraform provider. 
+Both methods are cumbersome, error-prone, and slow down everyday workflows when switching frequently between clusters, namespaces, or repositories.
 
-# User guide
+---
 
-## Prerequisites
+## What does SAM do?
 
-sam doesn't directly require [sops](https://github.com/mozilla/sops) to be installed
-before it can be used but without it, sam is kinda useless.
+`sam` provides a smart, configurable layer on top of SOPS:
+- **CLI Wrapper**: Intercepts commands passed after `--`, automatically setting `SOPS_AGE_KEY` for decryption and injecting `--age <public-key>` for encryption commands.
+- **Native System Tray UI**: Runs in the background on macOS, Windows, and Linux to let you switch active keys, copy public recipient keys to the clipboard, or enter pass-through mode in a single click.
+- **Live Watchers**: Automatically detects changes to your key directory (`~/.age/`) and configuration file, keeping all CLI and UI instances synchronized in real time.
 
-[age](https://github.com/FiloSottile/age) isn't per se a requirement, 
-but you will already need to have age keys to use sam. Sam will not create age keys for you.
+---
 
-## General
+## Features
 
-After installation, add the age key files to the following path ```$HOME/.age/```. sam will detect age keys
-in this directory automatically by default. The filename should follow the following format: ```<KEY_NAME>.txt```.
+- 🚀 **Desktop System Tray**: Fast key selection directly from the menu bar / system tray.
+  - Currently only for MacOS and Windows 
+- 🔄 **Live Dynamic Watchers**: Adding, removing, or modifying key files in `~/.age/` updates the UI immediately without restarting.
+- 📋 **One-Click Clipboard Copy**: Copy public recipient keys (`age1...`), private keys, or key names to your clipboard from the CLI (`sam key copy`) or tray menu.
+- 🔀 **Independent Key Selection**: Choose separate keys for Encryption, Decryption, or link them for Both.
+- ⚡ **Pass-Through / Clear Mode**: Clear active keys (`sam key clear`) to revert to default SOPS behavior without closing SAM.
+- 🪟 **Native Windows & macOS Integration**:
+  - **Windows**: Dual-binary distribution with `sam.exe` (synchronous CLI console) and `samw.exe` (silent background tray launcher).
+  - **macOS**: Menu bar application with dockless background execution.
+- 📁 **Quick Directory Navigation**: Open configuration and key directories directly in Finder, File Explorer, or XDG.
 
-The default config file for sam will be created at ```$HOME/.sops-age-manager/config.yaml``` on first usage of sam
-if it doesn't exist already.
+---
 
-## Installation
+## System Tray UI
 
-Download the binary for your OS from the releases page on GitHub.
-
-Make sure to set the active key before using sam, 
-if not sops will return an error and sam will return the following error.
-
-```
-Could not find decryption key ""
-Could not find encryption key ""
-```
-
-## Commands
-
-The base command of sam does nothing by itself without a ```--``` separator after which you can 
-execute whatever you want. The base command simply sets the ```SOPS_AGE_KEY``` environment variable to 
-the correct value. For sops commands the ```--age``` argument will be injected automatically to the selected key.
-
-### Examples
+Launch the UI by running `sam` without subcommands or flags:
 
 ```bash
-sam key use private-helm-manifest
+sam
+```
+
+When launched, SAM sits in your system tray / menu bar with the following menu items:
+- **Keys Submenu**: Lists all detected keys from `~/.age/` (including subdirectories).
+  - **Both**: Set key for both encryption and decryption.
+  - **Encryption**: Set key for encryption only (passed as `--age`).
+  - **Decryption**: Set key for decryption only (passed as `SOPS_AGE_KEY`).
+  - **Copy**: Copy key name, public key (`age1...`), or private key to clipboard.
+- **Clear active keys**: Clears selected keys to operate in pass-through mode.
+- **Open Config Directory**: Opens `~/.sops-age-manager/` in your native file manager.
+- **Open Key Directory**: Opens `~/.age/` in your native file manager.
+
+### Windows: `sam.exe` vs `samw.exe`
+- **`sam.exe` (Console Executable)**: Use for command-line workflows in PowerShell, Command Prompt, Git Bash, and scripts. When run with no arguments, it launches the UI attached to your terminal session.
+- **`samw.exe` (GUI Executable)**: Use for desktop shortcuts, Start Menu entries, or Windows Startup (`shell:startup`). It launches the system tray icon completely silently with no terminal window flashing.
+
+---
+
+## User Guide
+
+### Prerequisites
+- [sops](https://github.com/getsops/sops) installed and available in `$PATH`.
+- Existing [age](https://github.com/FiloSottile/age) keys. (SAM manages existing keys; it does not generate new keys).
+
+### Installation
+Download the latest pre-compiled binary for your operating system and architecture from the [Releases](https://github.com/SayHeyD/sops-age-manager/releases) page on GitHub.
+
+### Key Directory Setup
+By default, SAM scans for age keys in `$HOME/.age/`.
+- Key files must use the `.txt` extension (e.g. `production.txt`, `staging.txt`).
+- The base filename without extension becomes the key identifier in SAM.
+- Nested folders are supported (e.g. `$HOME/.age/k8s/dev.txt` is identified as `k8s/dev`).
+
+A standard age key file contains comments, public key, and secret key:
+```text
+# created: 2026-01-01T00:00:00Z
+# public key: age1ql3...
+AGE-SECRET-KEY-1...
+```
+
+---
+
+## CLI Commands & Usage
+
+### Basic SOPS Execution
+
+Use the `--` delimiter to wrap any command. SAM sets the required environment variables and arguments for the active key:
+
+```bash
+# Decrypt a file using the active decryption key:
 sam -- sops -d super-secret.enc.yaml
+
+# Encrypt a file using the active encryption key:
+sam -- sops -e -i secret.yaml
+
+# Works with any tool that consumes SOPS or SOPS_AGE_KEY:
+sam -- terraform plan
 ```
+
+### Key Management Commands
 
 ```bash
-sam key use private-helm-manifest
-sam -- sops -e super-secret.dec.yaml
+# List all available age keys and see which keys are active:
+sam key list
+
+# Select active keys for both encryption and decryption:
+sam key use production-cluster
+
+# Select a key for encryption only:
+sam key use production-cluster -e
+
+# Select a key for decryption only:
+sam key use staging-cluster -d
+
+# Copy the public key (age1...) recipient string to your clipboard:
+sam key copy production-cluster
+
+# Copy private key or key name to clipboard:
+sam key copy production-cluster --private
+sam key copy production-cluster --name
+
+# Clear active keys to enter pass-through mode:
+sam key clear
+sam key clear -e    # Clear encryption key only
+sam key clear -d    # Clear decryption key only
 ```
 
-The ```--age``` argument is passed automatically by sam.
+### Configuration Commands
 
-__COMMAND DOCUMENTATION:__
+```bash
+# Display the path to the active configuration file:
+sam config path
 
-- [SAM](./docs/sam.md)
+# Output the contents of the configuration file:
+sam config dump
+```
+
+### Command Documentation
+
+Detailed CLI documentation is available in the [`docs/`](./docs) directory:
+- [SAM Base Command](./docs/sam.md)
   - [Config](./docs/sam_config.md)
     - [Dump](./docs/sam_config_dump.md)
     - [Path](./docs/sam_config_path.md)
   - [Key](./docs/sam_key.md)
+    - [Clear](./docs/sam_key_clear.md)
+    - [Copy](./docs/sam_key_copy.md)
     - [List](./docs/sam_key_list.md)
     - [Use](./docs/sam_key_use.md)
 
+---
+
 ## Configuration
 
-Configuration is quite minimal and lets you configure the following values:
+The default configuration file is created automatically at `$HOME/.sops-age-manager/config.yaml`.
 
-- [encryption-key](#encryption-key)
-- [decryption-key](#decryption-key)
-- [key-dir](#key-dir)
+```yaml
+encryptionKey: "production-cluster"
+decryptionKey: "production-cluster"
+keyDir: ""
+```
 
-### Encryption Key
+### Fields
 
-The name of the encryption key to use. This is passed to sops as the ```--age``` arg to sops.
-Available key names can be listed with the [sam key list](./docs/sam_key_list.md) command.
-
-### Decryption Key
-
-The name of the decryption key to use. This is set as the value of the ```SOPS_AGE_KEY```
-environment variable which is consumed by sops.
-Available key names can be listed with the [sam key list](./docs/sam_key_list.md) command.
-
-### Key dir
-
-The directory where the age keys are stored. This has to be an absolute filepath. Environment variables are not parsed.
-
-All keys that are not directly in the key-dir i.e. in subfolders will not be detected by sam.
+- `encryptionKey`: The name of the key to use for encryption (injected as `--age <public-key>` into SOPS invocations). If empty, no `--age` flag is injected.
+- `decryptionKey`: The name of the key to use for decryption (set as `SOPS_AGE_KEY` in the environment). If empty, `SOPS_AGE_KEY` is not set.
+- `keyDir`: Custom absolute path to the directory containing `.txt` age key files. If left empty, defaults to `$HOME/.age/`.
