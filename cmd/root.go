@@ -59,6 +59,11 @@ func init() {
 }
 
 func executeSops(args []string) {
+	if showVersion {
+		fmt.Printf("sam version: %s (%s)\n", appVersion, runtime.Version())
+		return
+	}
+
 	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
 		log.Fatalf("loading config: %v", err)
@@ -68,11 +73,6 @@ func executeSops(args []string) {
 		fmt.Println("Running UI ... 🚀")
 		fmt.Println("Ctrl+C to cancel")
 		launchUIFunc(appConfig, appLogo)
-		return
-	}
-
-	if showVersion {
-		fmt.Printf("sam version: %s (%s)\n", appVersion, runtime.Version())
 		return
 	}
 
