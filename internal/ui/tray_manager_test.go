@@ -460,3 +460,88 @@ func TestTrayManagerClearActiveKeysMenuItem(t *testing.T) {
 			loadedCfg.EncryptionKeyName, loadedCfg.DecryptionKeyName)
 	}
 }
+
+func TestTrayManagerDynamicKeyWatcherAddAndRemove(t *testing.T) {
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	cleanup := setupTestConfig(t, "", "")
+	defer cleanup()
+
+	desk := &mockDesktopApp{}
+	tm := NewTrayManager(desk, nil, nil, testDir.Path)
+	tm.Refresh()
+
+	if err := tm.StartWatchingKeys(testDir.Path); err != nil {
+		t.Fatalf("failed to start key watching: %v", err)
+	}
+	defer tm.StopWatchingKeys()
+
+	// Initially 0 keys -> "No keys found"
+	if len(tm.entries) != 0 {
+		t.Fatalf("expected 0 entries initially, got %d", len(tm.entries))
+	}
+	if len(tm.keySubMenu.ChildMenu.Items) != 1 || tm.keySubMenu.ChildMenu.Items[0].Label != "No keys found" {
+		t.Fatalf("expected 'No keys found' item, got %v", tm.keySubMenu.ChildMenu.Items)
+	}
+
+	// 1. Add key-1
+	key1Path := testDir.Path + string(os.PathSeparator) + "key-1.txt"
+	key1Content := "# public key: age1samplekey1\nAGE-SECRET-KEY-1SAMPLEKEY1\n"
+	if err := os.WriteFile(key1Path, []byte(key1Content), 0600); err != nil {
+		t.Fatalf("failed to write key-1: %v", err)
+	}
+
+	time.Sleep(200 * time.Millisecond)
+
+	if len(tm.entries) != 1 {
+		t.Fatalf("expected 1 entry after adding key-1, got %d", len(tm.entries))
+	}
+	if tm.entries[0].key.Name != "key-1" {
+		t.Errorf("expected entry name 'key-1', got '%s'", tm.entries[0].key.Name)
+	}
+	if tm.keySubMenu.ChildMenu.Items[0].Label != "key-1" {
+		t.Errorf("expected child menu item label 'key-1', got '%s'", tm.keySubMenu.ChildMenu.Items[0].Label)
+	}
+
+	// 2. Add key-2
+	key2Path := testDir.Path + string(os.PathSeparator) + "key-2.txt"
+	key2Content := "# public key: age1samplekey2\nAGE-SECRET-KEY-1SAMPLEKEY2\n"
+	if err := os.WriteFile(key2Path, []byte(key2Content), 0600); err != nil {
+		t.Fatalf("failed to write key-2: %v", err)
+	}
+
+	time.Sleep(200 * time.Millisecond)
+
+	if len(tm.entries) != 2 {
+		t.Fatalf("expected 2 entries after adding key-2, got %d", len(tm.entries))
+	}
+
+	// 3. Remove key-1
+	if err := os.Remove(key1Path); err != nil {
+		t.Fatalf("failed to remove key-1: %v", err)
+	}
+
+	time.Sleep(200 * time.Millisecond)
+
+	if len(tm.entries) != 1 {
+		t.Fatalf("expected 1 entry after removing key-1, got %d", len(tm.entries))
+	}
+	if tm.entries[0].key.Name != "key-2" {
+		t.Errorf("expected remaining entry to be 'key-2', got '%s'", tm.entries[0].key.Name)
+	}
+
+	// 4. Remove key-2
+	if err := os.Remove(key2Path); err != nil {
+		t.Fatalf("failed to remove key-2: %v", err)
+	}
+
+	time.Sleep(200 * time.Millisecond)
+
+	if len(tm.entries) != 0 {
+		t.Fatalf("expected 0 entries after removing all keys, got %d", len(tm.entries))
+	}
+	if len(tm.keySubMenu.ChildMenu.Items) != 1 || tm.keySubMenu.ChildMenu.Items[0].Label != "No keys found" {
+		t.Fatalf("expected 'No keys found' item, got %v", tm.keySubMenu.ChildMenu.Items)
+	}
+}

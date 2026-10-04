@@ -12,38 +12,29 @@ import (
 )
 
 type TrayManager struct {
-	desk    desktop.App
-	entries []*keyEntry
-	menu    *fyne.Menu
-	logo    []byte
-	watcher *ConfigWatcher
+	desk       desktop.App
+	entries    []*keyEntry
+	keySubMenu *fyne.MenuItem
+	menu       *fyne.Menu
+	logo       []byte
+	keyDir     string
+	watcher    *ConfigWatcher
+	keyWatcher *KeyWatcher
 }
 
-func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager {
+func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte, keyDir ...string) *TrayManager {
 	tm := &TrayManager{
 		desk: desk,
 		logo: logo,
 	}
-
-	tm.entries = make([]*keyEntry, len(keys))
-	for i, k := range keys {
-		tm.entries[i] = newKeyEntry(k, tm.handleModeSelection)
-	}
-
-	var menuItems []*fyne.MenuItem
-	if len(tm.entries) == 0 {
-		noKeysItem := fyne.NewMenuItem("No keys found", func() {})
-		noKeysItem.Disabled = true
-		menuItems = []*fyne.MenuItem{noKeysItem}
-	} else {
-		menuItems = make([]*fyne.MenuItem, len(tm.entries))
-		for i, entry := range tm.entries {
-			menuItems[i] = entry.menuItem
-		}
+	if len(keyDir) > 0 {
+		tm.keyDir = keyDir[0]
 	}
 
 	keySubMenu := fyne.NewMenuItem("Keys", func() {})
-	keySubMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
+	tm.keySubMenu = keySubMenu
+
+	tm.buildKeyEntries(keys)
 
 	clearActiveKeysItem := fyne.NewMenuItem("Clear Active Keys", func() {
 		key.ClearActiveKeys()
@@ -56,11 +47,13 @@ func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager
 	})
 
 	openKeyDirItem := fyne.NewMenuItem("Open Key Directory", func() {
-		var keyDir string
-		if cfg, err := config.NewConfigFromFile(); err == nil && cfg != nil {
-			keyDir = cfg.KeyDir
+		dir := tm.keyDir
+		if dir == "" {
+			if cfg, err := config.NewConfigFromFile(); err == nil && cfg != nil {
+				dir = cfg.KeyDir
+			}
 		}
-		if err := OpenKeyDirectory(keyDir); err != nil {
+		if err := OpenKeyDirectory(dir); err != nil {
 			log.Printf("could not open key directory: %v", err)
 		}
 	})
@@ -83,6 +76,47 @@ func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager
 	return tm
 }
 
+func (tm *TrayManager) buildKeyEntries(keys []*key.Key) {
+	tm.entries = make([]*keyEntry, len(keys))
+	for i, k := range keys {
+		tm.entries[i] = newKeyEntry(k, tm.handleModeSelection)
+	}
+
+	var menuItems []*fyne.MenuItem
+	if len(tm.entries) == 0 {
+		noKeysItem := fyne.NewMenuItem("No keys found", func() {})
+		noKeysItem.Disabled = true
+		menuItems = []*fyne.MenuItem{noKeysItem}
+	} else {
+		menuItems = make([]*fyne.MenuItem, len(tm.entries))
+		for i, entry := range tm.entries {
+			menuItems[i] = entry.menuItem
+		}
+	}
+
+	if tm.keySubMenu != nil {
+		tm.keySubMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
+	}
+}
+
+func (tm *TrayManager) UpdateKeys(keys []*key.Key) {
+	tm.buildKeyEntries(keys)
+	tm.Refresh()
+}
+
+func (tm *TrayManager) ReloadKeys() {
+	keyDirPath, err := key.GetKeyDirPath(tm.keyDir)
+	if err != nil {
+		log.Printf("could not resolve key directory path: %v", err)
+		return
+	}
+	keys, err := key.FindAvailableKeys(keyDirPath)
+	if err != nil {
+		log.Printf("could not read key files: %v", err)
+	}
+	tm.UpdateKeys(keys)
+}
+
 func (tm *TrayManager) handleModeSelection(k *key.Key, mode KeyMode) {
 	switch mode {
 	case ModeBoth:
@@ -99,6 +133,17 @@ func (tm *TrayManager) Refresh() {
 	if err != nil {
 		log.Printf("could not load configuration: %v", err)
 		return
+	}
+
+	if appConfig.KeyDir != "" && appConfig.KeyDir != tm.keyDir {
+		if resolvedKeyDir, err := key.GetKeyDirPath(appConfig.KeyDir); err == nil && resolvedKeyDir != tm.keyDir {
+			tm.keyDir = resolvedKeyDir
+			if tm.keyWatcher != nil {
+				_ = tm.StartWatchingKeys(resolvedKeyDir)
+			}
+			tm.ReloadKeys()
+			return
+		}
 	}
 
 	for _, entry := range tm.entries {
@@ -124,9 +169,38 @@ func (tm *TrayManager) StartWatching(configPath string) error {
 	return nil
 }
 
+func (tm *TrayManager) StartWatchingKeys(keyDirPath string) error {
+	if tm.keyWatcher != nil {
+		tm.keyWatcher.Stop()
+		tm.keyWatcher = nil
+	}
+
+	resolvedKeyDir, err := key.GetKeyDirPath(keyDirPath)
+	if err != nil {
+		return err
+	}
+	tm.keyDir = resolvedKeyDir
+
+	kw, err := NewKeyWatcher(resolvedKeyDir, tm.ReloadKeys)
+	if err != nil {
+		return err
+	}
+
+	tm.keyWatcher = kw
+	return nil
+}
+
+func (tm *TrayManager) StopWatchingKeys() {
+	if tm.keyWatcher != nil {
+		tm.keyWatcher.Stop()
+		tm.keyWatcher = nil
+	}
+}
+
 func (tm *TrayManager) StopWatching() {
 	if tm.watcher != nil {
 		tm.watcher.Stop()
 		tm.watcher = nil
 	}
+	tm.StopWatchingKeys()
 }

@@ -39,7 +39,9 @@ func getPubKeyFromFileContents(contents string) string {
 	_, afterPublicKeyString, _ := strings.Cut(contents, publicKeyPrefix)
 	publicKey, _, _ := strings.Cut(afterPublicKeyString, privateKeyPrefix)
 
-	publicKey = publicKey[:len(publicKey)-1]
+	if len(publicKey) > 0 {
+		publicKey = publicKey[:len(publicKey)-1]
+	}
 
 	return publicKey
 }
