@@ -3,6 +3,7 @@
 package ui
 
 import (
+	"log"
 	"time"
 
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
@@ -29,6 +30,14 @@ func setActivationPolicy() {
 }
 
 func Init(config *config.Config, logo []byte) {
+	lockFilePath := getLockFilePath(config)
+	lock, err := AcquireInstanceLock(lockFilePath)
+	if err != nil {
+		log.Printf("SAM is already running: %v", err)
+		return
+	}
+	defer lock.Release()
+
 	a := app.New()
 
 	keys := key.GetAvailableKeys(config.KeyDir)
