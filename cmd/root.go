@@ -56,6 +56,7 @@ func init() {
 
 	RootCmd.AddCommand(keyCommands)
 	RootCmd.AddCommand(configCommands)
+	RootCmd.AddCommand(completionCommand)
 }
 
 func executeSops(args []string) {
