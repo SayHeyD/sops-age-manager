@@ -3,7 +3,7 @@ GOARCH ?= $(shell go env GOARCH)
 CGO_ENABLED ?= $(if $(filter darwin windows,$(GOOS)),1,0)
 EXT := $(if $(filter windows,$(GOOS)),.exe,)
 OUTPUT ?= sam$(EXT)
-LDFLAGS ?=
+OUTPUT_GUI ?= samw$(EXT)
 
 ifeq ($(GOOS),windows)
   ifeq ($(GOARCH),arm64)
@@ -25,10 +25,14 @@ build:
 	@if [ "$(GOOS)" = "windows" ] && [ ! -f "rsrc_windows_$(GOARCH).syso" ]; then $(MAKE) winres; fi
 	@echo "Building application ($(GOOS)/$(GOARCH))... 🔄"
 	@mkdir -p bin
-	@$(if $(CC_TARGET),CC="$(CC_TARGET)",) CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build $(LDFLAGS) -tags main -o bin/$(OUTPUT) . && echo "Finished building ✅" || { echo "Build failed ❌"; exit 1; }
+	@$(if $(CC_TARGET),CC="$(CC_TARGET)",) CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -tags main -o bin/$(OUTPUT) . && echo "Finished building ✅" || { echo "Build failed ❌"; exit 1; }
+ifeq ($(GOOS),windows)
+	@echo "Building Windows GUI launcher ($(GOOS)/$(GOARCH))... 🔄"
+	@$(if $(CC_TARGET),CC="$(CC_TARGET)",) CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-H=windowsgui" -tags main -o bin/$(OUTPUT_GUI) . && echo "Finished building GUI launcher ✅" || { echo "Build failed ❌"; exit 1; }
+endif
 
 build-release:
-	@$(MAKE) build OUTPUT=sam_$(GOOS)_$(GOARCH)$(EXT)
+	@$(MAKE) build OUTPUT=sam_$(GOOS)_$(GOARCH)$(EXT) OUTPUT_GUI=samw_$(GOOS)_$(GOARCH)$(EXT)
 
 build-all:
 	@echo "Building all release targets... 🔄"
