@@ -128,7 +128,7 @@ func TestKeySetActiveFunctions(t *testing.T) {
 	}
 }
 
-func TestKeyClearActiveFunctions(t *testing.T) {
+func TestClearActiveEncryption(t *testing.T) {
 	testDir := test.GenerateNewUniqueTestDir(t)
 	defer testDir.CleanTestDir(t)
 
@@ -140,7 +140,6 @@ func TestKeyClearActiveFunctions(t *testing.T) {
 		t.Fatalf("could not write initial config: %v", err)
 	}
 
-	// Test ClearActiveEncryption
 	ClearActiveEncryption()
 	loadedCfg, err := config.NewConfigFromFile()
 	if err != nil {
@@ -150,17 +149,22 @@ func TestKeyClearActiveFunctions(t *testing.T) {
 		t.Errorf("unexpected keys after ClearActiveEncryption: enc=%s, dec=%s",
 			loadedCfg.EncryptionKeyName, loadedCfg.DecryptionKeyName)
 	}
+}
 
-	// Reset config
-	cfg.EncryptionKeyName = "initial-enc"
-	cfg.DecryptionKeyName = "initial-dec"
+func TestClearActiveDecryption(t *testing.T) {
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	configPath := filepath.Join(testDir.Path, "config.yaml")
+	t.Setenv("SOPS_AGE_MANAGER_CONFIG_DIR", configPath)
+
+	cfg := config.NewConfig("initial-enc", "initial-dec", testDir.Path)
 	if err := cfg.Write(); err != nil {
-		t.Fatalf("could not reset config: %v", err)
+		t.Fatalf("could not write initial config: %v", err)
 	}
 
-	// Test ClearActiveDecryption
 	ClearActiveDecryption()
-	loadedCfg, err = config.NewConfigFromFile()
+	loadedCfg, err := config.NewConfigFromFile()
 	if err != nil {
 		t.Fatalf("could not read config: %v", err)
 	}
@@ -168,17 +172,22 @@ func TestKeyClearActiveFunctions(t *testing.T) {
 		t.Errorf("unexpected keys after ClearActiveDecryption: enc=%s, dec=%s",
 			loadedCfg.EncryptionKeyName, loadedCfg.DecryptionKeyName)
 	}
+}
 
-	// Reset config
-	cfg.EncryptionKeyName = "initial-enc"
-	cfg.DecryptionKeyName = "initial-dec"
+func TestClearActiveKeys(t *testing.T) {
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	configPath := filepath.Join(testDir.Path, "config.yaml")
+	t.Setenv("SOPS_AGE_MANAGER_CONFIG_DIR", configPath)
+
+	cfg := config.NewConfig("initial-enc", "initial-dec", testDir.Path)
 	if err := cfg.Write(); err != nil {
-		t.Fatalf("could not reset config: %v", err)
+		t.Fatalf("could not write initial config: %v", err)
 	}
 
-	// Test ClearActiveKeys
 	ClearActiveKeys()
-	loadedCfg, err = config.NewConfigFromFile()
+	loadedCfg, err := config.NewConfigFromFile()
 	if err != nil {
 		t.Fatalf("could not read config: %v", err)
 	}
