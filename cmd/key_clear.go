@@ -44,17 +44,17 @@ func clearActiveKeys() {
 
 	if !clearDecryptionKey && !clearEncryptionKey {
 		key.ClearActiveKeys()
-		fmt.Printf(clearedDecryptionKeyTemplate)
-		fmt.Printf(clearedEncryptionKeyTemplate)
+		fmt.Print(clearedDecryptionKeyTemplate)
+		fmt.Print(clearedEncryptionKeyTemplate)
 	} else {
 		if clearDecryptionKey {
 			key.ClearActiveDecryption()
-			fmt.Printf(clearedDecryptionKeyTemplate)
+			fmt.Print(clearedDecryptionKeyTemplate)
 		}
 
 		if clearEncryptionKey {
 			key.ClearActiveEncryption()
-			fmt.Printf(clearedEncryptionKeyTemplate)
+			fmt.Print(clearedEncryptionKeyTemplate)
 		}
 	}
 }
