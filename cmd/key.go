@@ -17,4 +17,5 @@ func init() {
 	keyCommands.AddCommand(useKeyCommand)
 	keyCommands.AddCommand(copyKeyCommand)
 	keyCommands.AddCommand(clearKeyCommand)
+	keyCommands.AddCommand(createKeyCommand)
 }
