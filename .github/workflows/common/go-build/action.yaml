@@ -26,9 +26,7 @@ runs:
 
     - name: Build
       run: |
-        GOARCH=${{ inputs.GOARCH }} GOOS=${{ inputs.GOOS }} go build -tags main \
-        -o bin/sam_${{ inputs.GOOS }}_${{ inputs.GOARCH }}$(if [[ "${{ inputs.GOOS }}" == "windows" ]]; \
-        then echo ".exe"; fi) .
+        make build-release GOOS=${{ inputs.GOOS }} GOARCH=${{ inputs.GOARCH }}
       shell: bash
 
     - name: Upload artifact

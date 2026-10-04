@@ -10,7 +10,7 @@ echo "Finished preparing .app directory ✅"
 
 echo "Building binary... 🔄"
 go build -tags main -o ./build/SAM.app/Contents/MacOS/sam . && \
-   echo "Finished building binary ✅" || (echo echo "Binary build failed ❌"; exit 1)
+   echo "Finished building binary ✅" || { echo "Binary build failed ❌"; exit 1; }
 
 echo "Generating iconset... 🔄"
 for SIZE in 16 32  128 256 512; do

@@ -5,6 +5,9 @@
 *.so
 *.dylib
 
+# Other temporary build files
+*.syso
+
 .idea/php.xml
 
 /bin
