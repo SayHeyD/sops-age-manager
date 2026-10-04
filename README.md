@@ -47,6 +47,7 @@ Both methods are cumbersome, error-prone, and slow down everyday workflows when 
 
 - 🚀 **Desktop System Tray**: Fast key selection directly from the menu bar / system tray.
   - Currently only for MacOS and Windows 
+- 🔑 **Key Generation**: Create new age keys on-demand (`sam key create <name>`) using the pre-installed `age-keygen` utility.
 - 🔄 **Live Dynamic Watchers**: Adding, removing, or modifying key files in `~/.age/` updates the UI immediately without restarting.
 - ⌨️ **Shell Autocompletion**: Native dynamic tab completion for key names (`sam key use <TAB>`, `sam key copy <TAB>`), subcommands, and flags in Bash, Zsh, PowerShell, and Fish.
 - 📋 **One-Click Clipboard Copy**: Copy public recipient keys (`age1...`), private keys, or key names to your clipboard from the CLI (`sam key copy`) or tray menu.
@@ -87,7 +88,7 @@ When launched, SAM sits in your system tray / menu bar with the following menu i
 
 ### Prerequisites
 - [sops](https://github.com/getsops/sops) installed and available in `$PATH`.
-- Existing [age](https://github.com/FiloSottile/age) keys. (SAM manages existing keys; it does not generate new keys).
+- [age](https://github.com/FiloSottile/age) (`age-keygen`) installed and available in `$PATH` (optional, for creating keys).
 
 ### Installation
 Download the latest pre-compiled binary for your operating system and architecture from the [Releases](https://github.com/SayHeyD/sops-age-manager/releases) page on GitHub.
@@ -127,6 +128,15 @@ sam -- terraform plan
 ### Key Management Commands
 
 ```bash
+# Create a new age key using age-keygen:
+sam key create production-cluster
+
+# Create a key and copy public recipient to clipboard:
+sam key create staging-cluster -c
+
+# Create a key and immediately set it as active:
+sam key create staging-cluster -u
+
 # List all available age keys and see which keys are active:
 sam key list
 
@@ -218,6 +228,7 @@ Detailed CLI documentation is available in the [`docs/`](./docs) directory:
   - [Key](./docs/sam_key.md)
     - [Clear](./docs/sam_key_clear.md)
     - [Copy](./docs/sam_key_copy.md)
+    - [Create](./docs/sam_key_create.md)
     - [List](./docs/sam_key_list.md)
     - [Use](./docs/sam_key_use.md)
 

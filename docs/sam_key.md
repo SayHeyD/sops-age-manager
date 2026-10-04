@@ -23,6 +23,7 @@ Commands for choosing and listing the available age keys to use with sops.
 * [sam](sam.md)	 - Sops-Age-Manager (SAM) is a tool for managing multiple age keys when using mozilla/sops
 * [sam key clear](sam_key_clear.md)	 - Clears the active encryption and/or decryption keys
 * [sam key copy](sam_key_copy.md)	 - Copy key attributes (public key, private key, or name) to clipboard
+* [sam key create](sam_key_create.md)	 - Create a new age key using age-keygen
 * [sam key list](sam_key_list.md)	 - Lists all available sops keys
 * [sam key use](sam_key_use.md)	 - Use the key with the given name
 
