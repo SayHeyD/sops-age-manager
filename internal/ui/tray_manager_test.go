@@ -55,6 +55,20 @@ func setupTestConfig(t *testing.T, encKey, decKey string) func() {
 	}
 }
 
+func eventually(t *testing.T, timeout time.Duration, condition func() bool) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if condition() {
+			return
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if !condition() {
+		t.Fatalf("condition not met within %v", timeout)
+	}
+}
+
 func TestNewTrayManager(t *testing.T) {
 	desk := &mockDesktopApp{}
 	keys := []*key.Key{
@@ -286,17 +300,10 @@ func TestTrayManagerWatchAndExternalConfigChange(t *testing.T) {
 	}
 
 	// Wait for watcher to trigger refresh
-	time.Sleep(200 * time.Millisecond)
-
-	// Verify key-1 is now encryption only, and key-2 is decryption only
-	if !tm.entries[0].encryptionItem.Checked || tm.entries[0].bothItem.Checked {
-		t.Errorf("expected entry0 to be encryption only, got enc=%v, both=%v",
-			tm.entries[0].encryptionItem.Checked, tm.entries[0].bothItem.Checked)
-	}
-	if !tm.entries[1].decryptionItem.Checked || tm.entries[1].bothItem.Checked {
-		t.Errorf("expected entry1 to be decryption only, got dec=%v, both=%v",
-			tm.entries[1].decryptionItem.Checked, tm.entries[1].bothItem.Checked)
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return tm.entries[0].encryptionItem.Checked && !tm.entries[0].bothItem.Checked &&
+			tm.entries[1].decryptionItem.Checked && !tm.entries[1].bothItem.Checked
+	})
 
 	// External CLI updates config to key-2 for both
 	cfg.EncryptionKeyName = "key-2"
@@ -304,12 +311,9 @@ func TestTrayManagerWatchAndExternalConfigChange(t *testing.T) {
 		t.Fatalf("could not write updated config: %v", err)
 	}
 
-	time.Sleep(200 * time.Millisecond)
-
-	if !tm.entries[1].bothItem.Checked || tm.entries[0].bothItem.Checked || tm.entries[0].encryptionItem.Checked {
-		t.Errorf("expected entry1 to be both, got entry0 enc=%v, entry1 both=%v",
-			tm.entries[0].encryptionItem.Checked, tm.entries[1].bothItem.Checked)
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return tm.entries[1].bothItem.Checked && !tm.entries[0].bothItem.Checked && !tm.entries[0].encryptionItem.Checked
+	})
 
 	// Stop watching idempotency
 	tm.StopWatching()
@@ -347,25 +351,16 @@ func TestTrayManagerHandleModeSelectionUpdatesViaWatcher(t *testing.T) {
 	tm.entries[1].encryptionItem.Action()
 
 	// Wait for watcher to trigger refresh
-	time.Sleep(200 * time.Millisecond)
-
-	if !tm.entries[1].encryptionItem.Checked || tm.entries[1].bothItem.Checked {
-		t.Errorf("expected key-2 to be encryption only via watcher, got enc=%v, both=%v",
-			tm.entries[1].encryptionItem.Checked, tm.entries[1].bothItem.Checked)
-	}
-	if !tm.entries[0].decryptionItem.Checked || tm.entries[0].bothItem.Checked {
-		t.Errorf("expected key-1 to be decryption only via watcher, got dec=%v, both=%v",
-			tm.entries[0].decryptionItem.Checked, tm.entries[0].bothItem.Checked)
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return tm.entries[1].encryptionItem.Checked && !tm.entries[1].bothItem.Checked &&
+			tm.entries[0].decryptionItem.Checked && !tm.entries[0].bothItem.Checked
+	})
 
 	// Trigger UI click on key2 both
 	tm.entries[1].bothItem.Action()
-	time.Sleep(200 * time.Millisecond)
-
-	if !tm.entries[1].bothItem.Checked || tm.entries[0].bothItem.Checked {
-		t.Errorf("expected key-2 to be both via watcher, got key2 both=%v, key1 both=%v",
-			tm.entries[1].bothItem.Checked, tm.entries[0].bothItem.Checked)
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return tm.entries[1].bothItem.Checked && !tm.entries[0].bothItem.Checked
+	})
 }
 
 func TestTrayManagerOpenDirectoryMenuItems(t *testing.T) {
@@ -441,15 +436,14 @@ func TestTrayManagerClearActiveKeysMenuItem(t *testing.T) {
 	clearItem.Action()
 
 	// Wait for watcher to trigger refresh
-	time.Sleep(200 * time.Millisecond)
-
-	// Verify all checkmarks are now unchecked
-	for i, entry := range tm.entries {
-		if entry.bothItem.Checked || entry.encryptionItem.Checked || entry.decryptionItem.Checked {
-			t.Errorf("entry %d has checked items after clear: both=%v, enc=%v, dec=%v",
-				i, entry.bothItem.Checked, entry.encryptionItem.Checked, entry.decryptionItem.Checked)
+	eventually(t, 2*time.Second, func() bool {
+		for _, entry := range tm.entries {
+			if entry.bothItem.Checked || entry.encryptionItem.Checked || entry.decryptionItem.Checked {
+				return false
+			}
 		}
-	}
+		return true
+	})
 
 	loadedCfg, err := config.NewConfigFromFile()
 	if err != nil {
@@ -492,16 +486,14 @@ func TestTrayManagerDynamicKeyWatcherAddAndRemove(t *testing.T) {
 		t.Fatalf("failed to write key-1: %v", err)
 	}
 
-	time.Sleep(200 * time.Millisecond)
+	eventually(t, 2*time.Second, func() bool {
+		return len(tm.entries) == 1 &&
+			len(tm.keySubMenu.ChildMenu.Items) == 1 &&
+			tm.keySubMenu.ChildMenu.Items[0].Label == "key-1"
+	})
 
-	if len(tm.entries) != 1 {
-		t.Fatalf("expected 1 entry after adding key-1, got %d", len(tm.entries))
-	}
 	if tm.entries[0].key.Name != "key-1" {
 		t.Errorf("expected entry name 'key-1', got '%s'", tm.entries[0].key.Name)
-	}
-	if tm.keySubMenu.ChildMenu.Items[0].Label != "key-1" {
-		t.Errorf("expected child menu item label 'key-1', got '%s'", tm.keySubMenu.ChildMenu.Items[0].Label)
 	}
 
 	// 2. Add key-2
@@ -511,37 +503,29 @@ func TestTrayManagerDynamicKeyWatcherAddAndRemove(t *testing.T) {
 		t.Fatalf("failed to write key-2: %v", err)
 	}
 
-	time.Sleep(200 * time.Millisecond)
-
-	if len(tm.entries) != 2 {
-		t.Fatalf("expected 2 entries after adding key-2, got %d", len(tm.entries))
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return len(tm.entries) == 2 &&
+			len(tm.keySubMenu.ChildMenu.Items) == 2
+	})
 
 	// 3. Remove key-1
 	if err := os.Remove(key1Path); err != nil {
 		t.Fatalf("failed to remove key-1: %v", err)
 	}
 
-	time.Sleep(200 * time.Millisecond)
-
-	if len(tm.entries) != 1 {
-		t.Fatalf("expected 1 entry after removing key-1, got %d", len(tm.entries))
-	}
-	if tm.entries[0].key.Name != "key-2" {
-		t.Errorf("expected remaining entry to be 'key-2', got '%s'", tm.entries[0].key.Name)
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return len(tm.entries) == 1 &&
+			tm.entries[0].key.Name == "key-2"
+	})
 
 	// 4. Remove key-2
 	if err := os.Remove(key2Path); err != nil {
 		t.Fatalf("failed to remove key-2: %v", err)
 	}
 
-	time.Sleep(200 * time.Millisecond)
-
-	if len(tm.entries) != 0 {
-		t.Fatalf("expected 0 entries after removing all keys, got %d", len(tm.entries))
-	}
-	if len(tm.keySubMenu.ChildMenu.Items) != 1 || tm.keySubMenu.ChildMenu.Items[0].Label != "No keys found" {
-		t.Fatalf("expected 'No keys found' item, got %v", tm.keySubMenu.ChildMenu.Items)
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return len(tm.entries) == 0 &&
+			len(tm.keySubMenu.ChildMenu.Items) == 1 &&
+			tm.keySubMenu.ChildMenu.Items[0].Label == "No keys found"
+	})
 }

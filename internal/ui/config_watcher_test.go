@@ -39,11 +39,9 @@ func TestConfigWatcherDetectsFileChanges(t *testing.T) {
 	}
 
 	// Wait for debounce and callback
-	time.Sleep(200 * time.Millisecond)
-
-	if count := atomic.LoadInt32(&changeCount); count < 1 {
-		t.Errorf("expected at least 1 change notification, got %d", count)
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return atomic.LoadInt32(&changeCount) >= 1
+	})
 
 	// Test Stop idempotency
 	cw.Stop()

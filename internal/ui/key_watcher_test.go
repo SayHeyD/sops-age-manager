@@ -33,10 +33,9 @@ func TestKeyWatcherFileEvents(t *testing.T) {
 	}
 
 	// Wait for debounce
-	time.Sleep(150 * time.Millisecond)
-	if atomic.LoadInt32(&changeCount) < 1 {
-		t.Errorf("expected at least 1 change event on file create, got %d", atomic.LoadInt32(&changeCount))
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return atomic.LoadInt32(&changeCount) >= 1
+	})
 
 	// Reset count
 	atomic.StoreInt32(&changeCount, 0)
@@ -46,10 +45,9 @@ func TestKeyWatcherFileEvents(t *testing.T) {
 		t.Fatalf("failed to modify key file: %v", err)
 	}
 
-	time.Sleep(150 * time.Millisecond)
-	if atomic.LoadInt32(&changeCount) < 1 {
-		t.Errorf("expected at least 1 change event on file modify, got %d", atomic.LoadInt32(&changeCount))
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return atomic.LoadInt32(&changeCount) >= 1
+	})
 
 	// Reset count
 	atomic.StoreInt32(&changeCount, 0)
@@ -59,10 +57,9 @@ func TestKeyWatcherFileEvents(t *testing.T) {
 		t.Fatalf("failed to remove key file: %v", err)
 	}
 
-	time.Sleep(150 * time.Millisecond)
-	if atomic.LoadInt32(&changeCount) < 1 {
-		t.Errorf("expected at least 1 change event on file remove, got %d", atomic.LoadInt32(&changeCount))
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return atomic.LoadInt32(&changeCount) >= 1
+	})
 }
 
 func TestKeyWatcherSubdirectoryFileEvents(t *testing.T) {
@@ -94,10 +91,9 @@ func TestKeyWatcherSubdirectoryFileEvents(t *testing.T) {
 		t.Fatalf("failed to write nested key file: %v", err)
 	}
 
-	time.Sleep(150 * time.Millisecond)
-	if atomic.LoadInt32(&changeCount) < 1 {
-		t.Errorf("expected change event for nested file creation, got %d", atomic.LoadInt32(&changeCount))
-	}
+	eventually(t, 2*time.Second, func() bool {
+		return atomic.LoadInt32(&changeCount) >= 1
+	})
 }
 
 func TestKeyWatcherStopCleanly(t *testing.T) {
