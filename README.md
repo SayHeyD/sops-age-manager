@@ -48,6 +48,7 @@ Both methods are cumbersome, error-prone, and slow down everyday workflows when 
 - 🚀 **Desktop System Tray**: Fast key selection directly from the menu bar / system tray.
   - Currently only for MacOS and Windows 
 - 🔄 **Live Dynamic Watchers**: Adding, removing, or modifying key files in `~/.age/` updates the UI immediately without restarting.
+- ⌨️ **Shell Autocompletion**: Native dynamic tab completion for key names (`sam key use <TAB>`, `sam key copy <TAB>`), subcommands, and flags in Bash, Zsh, PowerShell, and Fish.
 - 📋 **One-Click Clipboard Copy**: Copy public recipient keys (`age1...`), private keys, or key names to your clipboard from the CLI (`sam key copy`) or tray menu.
 - 🔀 **Independent Key Selection**: Choose separate keys for Encryption, Decryption, or link them for Both.
 - ⚡ **Pass-Through / Clear Mode**: Clear active keys (`sam key clear`) to revert to default SOPS behavior without closing SAM.
@@ -161,10 +162,56 @@ sam config path
 sam config dump
 ```
 
+### Shell Autocompletion
+
+SAM supports full shell autocompletion for subcommands, flags, and dynamic key name suggestions (`sam key use <TAB>`, `sam key copy <TAB>`).
+
+Generate the autocompletion script for your preferred shell:
+
+#### Bash
+```bash
+# Load in current session:
+source <(sam completion bash)
+
+# Load automatically for new sessions:
+# Linux:
+sam completion bash > /etc/bash_completion.d/sam
+# macOS:
+sam completion bash > $(brew --prefix)/etc/bash_completion.d/sam
+```
+
+#### Zsh
+```bash
+# Load in current session:
+source <(sam completion zsh)
+
+# Load automatically for new sessions:
+sam completion zsh > "${fpath[1]}/_sam"
+```
+
+#### PowerShell (Windows / macOS / Linux)
+```powershell
+# Load in current session:
+sam completion powershell | Out-String | Invoke-Expression
+
+# Load automatically for new sessions (add to $PROFILE):
+Add-Content -Path $PROFILE -Value "sam completion powershell | Out-String | Invoke-Expression"
+```
+
+#### Fish
+```fish
+# Load in current session:
+sam completion fish | source
+
+# Load automatically for new sessions:
+sam completion fish > ~/.config/fish/completions/sam.fish
+```
+
 ### Command Documentation
 
 Detailed CLI documentation is available in the [`docs/`](./docs) directory:
 - [SAM Base Command](./docs/sam.md)
+  - [Completion](./docs/sam_completion.md)
   - [Config](./docs/sam_config.md)
     - [Dump](./docs/sam_config_dump.md)
     - [Path](./docs/sam_config_path.md)

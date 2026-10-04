@@ -28,6 +28,7 @@ sam [flags]
 
 ### SEE ALSO
 
+* [sam completion](sam_completion.md)	 - Generate completion script for the specified shell
 * [sam config](sam_config.md)	 - Commands regarding the application configuration
 * [sam key](sam_key.md)	 - Commands for managing the detected age keys
 
