@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/SayHeyD/sops-age-manager/pkg/key"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 var (
@@ -46,21 +47,24 @@ Flags:
 func setActiveKey(keyName string) {
 	keys := key.GetAvailableKeys("")
 
+	activeDecryptionKeyTemplate := "Set \"%s\" as active decryption key\n"
+	activeEncryptionKeyTemplate := "Set \"%s\" as active encryption key\n"
+
 	for _, ageKey := range keys {
 		if ageKey.Name == keyName {
 			if !setDecryptionKey && !setEncryptionKey {
 				ageKey.SetActiveBoth()
-				fmt.Printf("Set \"%s\" as active decryption key\n", ageKey.Name)
-				fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
+				fmt.Printf(activeDecryptionKeyTemplate, ageKey.Name)
+				fmt.Printf(activeEncryptionKeyTemplate, ageKey.Name)
 			} else {
 				if setDecryptionKey {
 					ageKey.SetActiveDecryption()
-					fmt.Printf("Set \"%s\" as active decryption key\n", ageKey.Name)
+					fmt.Printf(activeDecryptionKeyTemplate, ageKey.Name)
 				}
 
 				if setEncryptionKey {
 					ageKey.SetActiveEncryption()
-					fmt.Printf("Set \"%s\" as active encryption key\n", ageKey.Name)
+					fmt.Printf(activeEncryptionKeyTemplate, ageKey.Name)
 				}
 			}
 
