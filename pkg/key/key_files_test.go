@@ -123,10 +123,32 @@ func TestGetAvailableKeysReturnsCorrectKeys(t *testing.T) {
 	}
 }
 
-func TestGetAvailableKeysCreatesKeyDirIfItDoesNotExist(t *testing.T) {
-	t.Skip()
-	/*
-		TODO: find a way to test this nicely. Currently this results in log.Fatal
-			  which is what we want but it is not really testable
-	*/
+func TestFindAvailableKeysEmptyDir(t *testing.T) {
+	t.Parallel()
+	testDir := test.GenerateNewUniqueTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	keys, err := FindAvailableKeys(testDir.Path)
+	if err != nil {
+		t.Fatalf("unexpected error finding keys in empty directory: %v", err)
+	}
+
+	if len(keys) != 0 {
+		t.Fatalf("expected 0 keys, got %d", len(keys))
+	}
+}
+
+func TestFindAvailableKeysReturnsKeys(t *testing.T) {
+	t.Parallel()
+	testDir := prepareKeyTestDir(t)
+	defer testDir.CleanTestDir(t)
+
+	keys, err := FindAvailableKeys(testDir.Path)
+	if err != nil {
+		t.Fatalf("unexpected error finding keys: %v", err)
+	}
+
+	if len(keys) != len(getTestKeys()) {
+		t.Fatalf("expected %d keys, got %d", len(getTestKeys()), len(keys))
+	}
 }

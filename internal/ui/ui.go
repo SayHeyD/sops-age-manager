@@ -21,7 +21,15 @@ func Init(config *config.Config, logo []byte) {
 
 	a := app.New()
 
-	keys := key.GetAvailableKeys(config.KeyDir)
+	var keyDir string
+	if config != nil {
+		keyDir = config.KeyDir
+	}
+
+	keys, err := key.FindAvailableKeys(keyDir)
+	if err != nil {
+		log.Printf("could not read key files: %v", err)
+	}
 
 	CreateSysTrayMenu(a, keys, config, logo)
 

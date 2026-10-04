@@ -77,6 +77,49 @@ func TestNewTrayManager(t *testing.T) {
 	}
 }
 
+func TestNewTrayManagerNoKeys(t *testing.T) {
+	desk := &mockDesktopApp{}
+	logo := []byte("fake-png-data")
+
+	tm := NewTrayManager(desk, nil, logo)
+	if tm == nil {
+		t.Fatal("expected NewTrayManager to return a non-nil TrayManager")
+	}
+
+	if len(tm.entries) != 0 {
+		t.Fatalf("expected 0 entries, got %d", len(tm.entries))
+	}
+
+	if desk.menu == nil {
+		t.Fatal("expected SetSystemTrayMenu to be called")
+	}
+
+	if len(desk.menu.Items) != 1 {
+		t.Fatalf("expected 1 root menu item, got %d", len(desk.menu.Items))
+	}
+
+	keysItem := desk.menu.Items[0]
+	if keysItem.Label != "Keys" || keysItem.ChildMenu == nil {
+		t.Fatalf("expected 'Keys' menu item with child menu, got label '%s'", keysItem.Label)
+	}
+
+	if len(keysItem.ChildMenu.Items) != 1 {
+		t.Fatalf("expected 1 item in Keys child menu, got %d", len(keysItem.ChildMenu.Items))
+	}
+
+	noKeysItem := keysItem.ChildMenu.Items[0]
+	if noKeysItem.Label != "No keys found" {
+		t.Fatalf("expected 'No keys found' item, got '%s'", noKeysItem.Label)
+	}
+
+	if !noKeysItem.Disabled {
+		t.Fatal("expected 'No keys found' item to be disabled")
+	}
+
+	// Calling Refresh when no keys are loaded should not panic
+	tm.Refresh()
+}
+
 func TestTrayManagerRefresh(t *testing.T) {
 	cleanup := setupTestConfig(t, "key-1", "key-2")
 	defer cleanup()

@@ -30,9 +30,16 @@ func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager
 		tm.entries[i] = newKeyEntry(k, tm.handleModeSelection)
 	}
 
-	menuItems := make([]*fyne.MenuItem, len(tm.entries))
-	for i, entry := range tm.entries {
-		menuItems[i] = entry.menuItem
+	var menuItems []*fyne.MenuItem
+	if len(tm.entries) == 0 {
+		noKeysItem := fyne.NewMenuItem("No keys found", func() {})
+		noKeysItem.Disabled = true
+		menuItems = []*fyne.MenuItem{noKeysItem}
+	} else {
+		menuItems = make([]*fyne.MenuItem, len(tm.entries))
+		for i, entry := range tm.entries {
+			menuItems[i] = entry.menuItem
+		}
 	}
 
 	keySubMenu := fyne.NewMenuItem("Keys", func() {})

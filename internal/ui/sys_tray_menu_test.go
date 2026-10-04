@@ -67,6 +67,48 @@ func TestCreateSysTrayMenuWithDesktopApp(t *testing.T) {
 	}
 }
 
+func TestCreateSysTrayMenuNoKeys(t *testing.T) {
+	cleanup := setupTestConfig(t, "", "")
+	defer cleanup()
+
+	baseApp := fyneTest.NewApp()
+	deskApp := &mockFyneDesktopApp{App: baseApp}
+
+	cfg := config.NewConfig("", "", "")
+	logo := []byte("logo-bytes")
+
+	tm := CreateSysTrayMenu(deskApp, nil, cfg, logo)
+	if tm != nil {
+		defer tm.StopWatching()
+	}
+
+	if deskApp.menu == nil {
+		t.Fatal("expected menu to be created and set")
+	}
+
+	if len(deskApp.menu.Items) != 1 {
+		t.Fatalf("expected 1 root menu item, got %d", len(deskApp.menu.Items))
+	}
+
+	keysItem := deskApp.menu.Items[0]
+	if keysItem.Label != "Keys" || keysItem.ChildMenu == nil {
+		t.Fatalf("expected 'Keys' menu item with child menu, got label '%s'", keysItem.Label)
+	}
+
+	if len(keysItem.ChildMenu.Items) != 1 {
+		t.Fatalf("expected 1 item in Keys child menu, got %d", len(keysItem.ChildMenu.Items))
+	}
+
+	noKeysItem := keysItem.ChildMenu.Items[0]
+	if noKeysItem.Label != "No keys found" {
+		t.Fatalf("expected 'No keys found' item, got '%s'", noKeysItem.Label)
+	}
+
+	if !noKeysItem.Disabled {
+		t.Fatal("expected 'No keys found' item to be disabled")
+	}
+}
+
 func TestCreateSysTrayMenuWithNonDesktopApp(t *testing.T) {
 	plainApp := fyneTest.NewApp()
 	keys := []*key.Key{
