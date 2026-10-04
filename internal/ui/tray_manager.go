@@ -135,12 +135,9 @@ func (tm *TrayManager) Refresh() {
 		return
 	}
 
-	if appConfig.KeyDir != "" && appConfig.KeyDir != tm.keyDir {
+	if tm.keyWatcher != nil && appConfig.KeyDir != "" {
 		if resolvedKeyDir, err := key.GetKeyDirPath(appConfig.KeyDir); err == nil && resolvedKeyDir != tm.keyDir {
-			tm.keyDir = resolvedKeyDir
-			if tm.keyWatcher != nil {
-				_ = tm.StartWatchingKeys(resolvedKeyDir)
-			}
+			_ = tm.StartWatchingKeys(resolvedKeyDir)
 			tm.ReloadKeys()
 			return
 		}
