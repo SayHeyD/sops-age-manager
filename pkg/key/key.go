@@ -39,7 +39,9 @@ func getPubKeyFromFileContents(contents string) string {
 	_, afterPublicKeyString, _ := strings.Cut(contents, publicKeyPrefix)
 	publicKey, _, _ := strings.Cut(afterPublicKeyString, privateKeyPrefix)
 
-	publicKey = publicKey[:len(publicKey)-1]
+	if len(publicKey) > 0 {
+		publicKey = publicKey[:len(publicKey)-1]
+	}
 
 	return publicKey
 }
@@ -64,6 +66,60 @@ func (k *Key) SetActiveDecryption() {
 	}
 
 	appConfig.DecryptionKeyName = k.Name
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}
+
+func (k *Key) SetActiveBoth() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.EncryptionKeyName = k.Name
+	appConfig.DecryptionKeyName = k.Name
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}
+
+func ClearActiveEncryption() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.EncryptionKeyName = ""
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}
+
+func ClearActiveDecryption() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.DecryptionKeyName = ""
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}
+
+func ClearActiveKeys() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.EncryptionKeyName = ""
+	appConfig.DecryptionKeyName = ""
 	err = appConfig.Write()
 	if err != nil {
 		log.Fatalf("Could not write application config: %v", err)

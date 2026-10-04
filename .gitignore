@@ -5,7 +5,14 @@
 *.so
 *.dylib
 
+# Other temporary build files
+*.syso
+
+.idea/php.xml
+
 /bin
+/build
+/macos-build
 
 # Test binary, built with `go test -c`
 *.test

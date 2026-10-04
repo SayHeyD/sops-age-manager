@@ -15,4 +15,6 @@ var (
 func init() {
 	keyCommands.AddCommand(listKeyCommand)
 	keyCommands.AddCommand(useKeyCommand)
+	keyCommands.AddCommand(copyKeyCommand)
+	keyCommands.AddCommand(clearKeyCommand)
 }

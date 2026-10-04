@@ -1,19 +1,67 @@
-.PHONY: test
+GOOS ?= $(shell go env GOOS)
+GOARCH ?= $(shell go env GOARCH)
+CGO_ENABLED ?= $(if $(filter darwin windows,$(GOOS)),1,0)
+EXT := $(if $(filter windows,$(GOOS)),.exe,)
+OUTPUT ?= sam$(EXT)
+OUTPUT_GUI ?= samw$(EXT)
+
+ifeq ($(GOOS),windows)
+  ifeq ($(GOARCH),arm64)
+    CC_TARGET := aarch64-w64-mingw32-gcc
+  else ifeq ($(GOARCH),amd64)
+    ifneq ($(shell go env GOHOSTOS),windows)
+      CC_TARGET := x86_64-w64-mingw32-gcc
+    endif
+  endif
+endif
+
+.PHONY: test build build-release build-all docs clean dmg lint winres
+
+winres:
+	@echo "Generating Windows resources... 🔄"
+	@GOOS="" GOARCH="" go run github.com/tc-hib/go-winres@v0.3.3 simply --icon assets/Logo.png --arch amd64,arm64 --product-name "SOPS Age Manager" --file-description "SOPS Age Manager" --manifest gui && echo "Finished generating Windows resources ✅" || { echo "Failed to generate Windows resources ❌"; exit 1; }
 
 build:
-	@echo "Building application... 🔄"
-	@go build -tags main -o bin/sam . && echo "Finished building ✅" || (echo echo "Build failed ❌"; exit 1)
+	@if [ "$(GOOS)" = "windows" ] && [ ! -f "rsrc_windows_$(GOARCH).syso" ]; then $(MAKE) winres; fi
+	@echo "Building application ($(GOOS)/$(GOARCH))... 🔄"
+	@mkdir -p bin
+	@$(if $(CC_TARGET),CC="$(CC_TARGET)",) CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -tags main -o bin/$(OUTPUT) . && echo "Finished building ✅" || { echo "Build failed ❌"; exit 1; }
+ifeq ($(GOOS),windows)
+	@echo "Building Windows GUI launcher ($(GOOS)/$(GOARCH))... 🔄"
+	@$(if $(CC_TARGET),CC="$(CC_TARGET)",) CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-H=windowsgui" -tags main -o bin/$(OUTPUT_GUI) . && echo "Finished building GUI launcher ✅" || { echo "Build failed ❌"; exit 1; }
+endif
+
+build-release:
+	@$(MAKE) build OUTPUT=sam_$(GOOS)_$(GOARCH)$(EXT) OUTPUT_GUI=samw_$(GOOS)_$(GOARCH)$(EXT)
+
+build-all:
+	@echo "Building all release targets... 🔄"
+	@$(MAKE) build-release GOOS=darwin GOARCH=arm64
+	@$(MAKE) build-release GOOS=darwin GOARCH=amd64
+	@$(MAKE) build-release GOOS=linux GOARCH=amd64
+	@$(MAKE) build-release GOOS=linux GOARCH=arm64
+	@$(MAKE) build-release GOOS=windows GOARCH=amd64
+	@$(MAKE) build-release GOOS=windows GOARCH=arm64
+	@echo "All release targets built successfully ✅"
 
 docs:
 	@echo "Building docs application... 🔄"
-	@go build -tags docs -o bin/sam . && echo "Finished building ✅" || (echo echo "Build failed ❌"; exit 1)
+	@mkdir -p bin
+	@go build -tags docs -o bin/sam . && echo "Finished building ✅" || { echo "Build failed ❌"; exit 1; }
 	@echo "\nGenerating docs... 🔄"
-	@./bin/sam && echo "Finished docs generation ✅" || (echo echo "Docs generation failed ❌"; exit 1)
+	@./bin/sam && echo "Finished docs generation ✅" || { echo "Docs generation failed ❌"; exit 1; }
 
 test:
 	@echo "Running test... 🔄"
-	@go test ./... -v -parallel 4 -cover && echo "Tests finished successfully ✅" || (echo echo "Tests finished with errors ❌"; exit 1)
+	@go test ./... -v -parallel 4 -cover && echo "Tests finished successfully ✅" || { echo "Tests finished with errors ❌"; exit 1; }
+
+lint:
+	@echo "Running linter... 🔄"
+	@golangci-lint run && echo "Lint passed ✅" || { echo "Lint failed ❌"; exit 1; }
 
 clean:
 	@echo "Cleaning build products... 🔄"
-	@rm -f ./bin/sam* && echo "Cleaning done ✅" || (echo echo "Cleaning failed ❌"; exit 1)
+	@rm -rf ./bin ./build *.syso && echo "Cleaning done ✅" || { echo "Cleaning failed ❌"; exit 1; }
+
+dmg: build
+	@./macos_build.sh

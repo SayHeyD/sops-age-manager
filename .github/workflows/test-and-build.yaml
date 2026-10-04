@@ -5,14 +5,18 @@ on:
     paths:
       - '**.go'
       - '.github/workflows/test-and-build.yaml'
+      - '.github/workflows/common/go-setup/action.yaml'
 jobs:
   test-and-build:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup
         uses: ./.github/workflows/common/go-setup

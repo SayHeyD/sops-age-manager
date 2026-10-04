@@ -16,6 +16,9 @@ var (
 	showVersion bool
 
 	appVersion string
+	appLogo    []byte
+
+	launchUIFunc = launchUI
 
 	RootCmd = &cobra.Command{
 		Use:   "sam",
@@ -23,6 +26,8 @@ var (
 		Long: `Sops-Age-Manager (SAM) is a tool for managing the age key used by sops.
 This wrapper for sops should provide key selection by name, rather than
 by using the private or public key.
+
+Run the program without flags or subcommands to launch the app as a tray-icon.
 
 Use the base command with '--' after which you can execute what you want. 
 The sops configuration will be applied automatically.
@@ -34,8 +39,9 @@ GitHub: https://github.com/SayHeyD/sops-age-manager`,
 	}
 )
 
-func Execute(version string) {
+func Execute(version string, logo []byte) {
 	appVersion = version
+	appLogo = logo
 
 	if err := RootCmd.Execute(); err != nil {
 		log.Fatalf("executing rootCmd: %v", err)
@@ -44,6 +50,7 @@ func Execute(version string) {
 
 func init() {
 	cobra.OnInitialize()
+	cobra.MousetrapHelpText = ""
 
 	RootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Shows the current version of sam")
 
@@ -59,27 +66,42 @@ func executeSops(args []string) {
 
 	appConfig, err := config.NewConfigFromFile()
 	if err != nil {
-		log.Fatalf("execute sops: %v", err)
+		log.Fatalf("loading config: %v", err)
+	}
+
+	if len(args) == 0 {
+		fmt.Println("Running UI ... 🚀")
+		fmt.Println("Ctrl+C to cancel")
+		launchUIFunc(appConfig, appLogo)
+		return
 	}
 
 	var wantedEncryptionKey *key.Key
 	var wantedDecryptionKey *key.Key
 
-	keys := key.GetAvailableKeys("")
+	if appConfig.EncryptionKeyName != "" || appConfig.DecryptionKeyName != "" {
+		keys := key.GetAvailableKeys(appConfig.KeyDir)
 
-	for _, foundKey := range keys {
-		if appConfig.EncryptionKeyName == foundKey.Name {
-			wantedEncryptionKey = foundKey
+		for _, foundKey := range keys {
+			if appConfig.EncryptionKeyName != "" && appConfig.EncryptionKeyName == foundKey.Name {
+				wantedEncryptionKey = foundKey
+			}
+
+			if appConfig.DecryptionKeyName != "" && appConfig.DecryptionKeyName == foundKey.Name {
+				wantedDecryptionKey = foundKey
+			}
 		}
 
-		if appConfig.DecryptionKeyName == foundKey.Name {
-			wantedDecryptionKey = foundKey
+		if appConfig.EncryptionKeyName != "" && wantedEncryptionKey == nil {
+			log.Printf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
+		}
+
+		if appConfig.DecryptionKeyName != "" && wantedDecryptionKey == nil {
+			log.Printf("Could not find decryption key \"%s\"", appConfig.DecryptionKeyName)
 		}
 	}
 
-	if wantedEncryptionKey == nil {
-		log.Printf("Could not find encryption key \"%s\"", appConfig.EncryptionKeyName)
-	} else {
+	if wantedEncryptionKey != nil {
 		for index, arg := range args {
 			if arg == "sops" {
 				argsUntilSops := make([]string, len(args[:index+1]))
@@ -92,12 +114,9 @@ func executeSops(args []string) {
 				args = append(firstArgHalf, argsAfterSops...)
 			}
 		}
-
 	}
 
-	if wantedDecryptionKey == nil {
-		log.Printf("Could not find decryption key \"%s\"", appConfig.DecryptionKeyName)
-	} else {
+	if wantedDecryptionKey != nil {
 		err = os.Setenv("SOPS_AGE_KEY", wantedDecryptionKey.PrivateKey)
 		if err != nil {
 			log.Fatalf("could not set env variable: %v", err)

@@ -17,9 +17,9 @@ env:
 
 jobs:
   build-macos-amd64:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build
         uses: ./.github/workflows/common/go-build
         with:
@@ -28,9 +28,9 @@ jobs:
           ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-macos-arm64:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build
         uses: ./.github/workflows/common/go-build
         with:
@@ -41,7 +41,7 @@ jobs:
   build-linux-amd64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build
         uses: ./.github/workflows/common/go-build
         with:
@@ -52,7 +52,7 @@ jobs:
   build-linux-arm64:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build
         uses: ./.github/workflows/common/go-build
         with:
@@ -61,9 +61,9 @@ jobs:
           ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-windows-amd64:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build
         uses: ./.github/workflows/common/go-build
         with:
@@ -72,9 +72,9 @@ jobs:
           ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-windows-arm64:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build
         uses: ./.github/workflows/common/go-build
         with:
