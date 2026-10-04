@@ -18,6 +18,23 @@ runs:
         sudo apt-get install gcc gobjc libgl1-mesa-dev xorg-dev -y
       shell: bash
 
+    - name: Install windows dev dependencies
+      if: runner.os == 'Windows'
+      run: |
+        if [ "${{ runner.arch }}" = "ARM64" ]; then
+          ARCH="aarch64"
+        else
+          ARCH="x86_64"
+        fi
+        LLVM_MINGW_VER="20240619"
+        curl -sL "https://github.com/mstorsjo/llvm-mingw/releases/download/${LLVM_MINGW_VER}/llvm-mingw-${LLVM_MINGW_VER}-ucrt-${ARCH}.zip" -o llvm-mingw.zip
+        7z x llvm-mingw.zip -o"C:/llvm-mingw-tmp"
+        mkdir -p "C:/llvm-mingw"
+        mv C:/llvm-mingw-tmp/llvm-mingw-*/* C:/llvm-mingw/
+        rm -rf llvm-mingw.zip C:/llvm-mingw-tmp
+        echo "C:/llvm-mingw/bin" >> $GITHUB_PATH
+      shell: bash
+
     - name: Install go dependencies
       run: go get -t ./...
       shell: bash

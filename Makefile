@@ -4,6 +4,12 @@ CGO_ENABLED ?= $(if $(filter darwin windows,$(GOOS)),1,0)
 EXT := $(if $(filter windows,$(GOOS)),.exe,)
 OUTPUT ?= sam$(EXT)
 
+ifeq ($(GOOS),windows)
+  ifeq ($(GOARCH),arm64)
+    CC_TARGET := aarch64-w64-mingw32-gcc
+  endif
+endif
+
 .PHONY: test build build-release build-all docs clean dmg lint winres
 
 winres:
@@ -14,7 +20,7 @@ build:
 	@if [ "$(GOOS)" = "windows" ] && [ ! -f "rsrc_windows_$(GOARCH).syso" ]; then $(MAKE) winres; fi
 	@echo "Building application ($(GOOS)/$(GOARCH))... 🔄"
 	@mkdir -p bin
-	@CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -tags main -o bin/$(OUTPUT) . && echo "Finished building ✅" || { echo "Build failed ❌"; exit 1; }
+	@$(if $(CC_TARGET),CC="$(CC_TARGET)",) CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) go build -tags main -o bin/$(OUTPUT) . && echo "Finished building ✅" || { echo "Build failed ❌"; exit 1; }
 
 build-release:
 	@$(MAKE) build OUTPUT=sam_$(GOOS)_$(GOARCH)$(EXT)

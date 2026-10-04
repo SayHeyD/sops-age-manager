@@ -72,7 +72,7 @@ jobs:
           ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
   build-windows-arm64:
-    runs-on: windows-11-arm
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
       - name: Build
