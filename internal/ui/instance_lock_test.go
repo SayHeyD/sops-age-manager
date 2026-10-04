@@ -24,13 +24,19 @@ func TestAcquireInstanceLock(t *testing.T) {
 	if lock1 == nil || lock1.file == nil {
 		t.Fatalf("expected non-nil lock1 with open file")
 	}
+	defer func() {
+		if lock1 != nil {
+			lock1.Release()
+		}
+	}()
 
 	// Verify PID was written to the lock file
-	content, err := os.ReadFile(lockPath)
-	if err != nil {
+	buf := make([]byte, 64)
+	n, err := lock1.file.ReadAt(buf, 0)
+	if err != nil && n == 0 {
 		t.Fatalf("failed to read lock file: %v", err)
 	}
-	pidStr := strings.TrimSpace(string(content))
+	pidStr := strings.TrimSpace(string(buf[:n]))
 	pid, err := strconv.Atoi(pidStr)
 	if err != nil || pid != os.Getpid() {
 		t.Errorf("expected PID %d in lock file, got %q", os.Getpid(), pidStr)
@@ -47,6 +53,7 @@ func TestAcquireInstanceLock(t *testing.T) {
 
 	// Releasing lock1 allows lock3 to be acquired
 	lock1.Release()
+	lock1 = nil
 
 	lock3, err := AcquireInstanceLock(lockPath)
 	if err != nil {
@@ -77,11 +84,13 @@ func TestInstanceLockNilAndDoubleRelease(t *testing.T) {
 
 func TestGetLockFilePath(t *testing.T) {
 	// Custom config path
+	customPath := filepath.Join(string(filepath.Separator)+"custom", "dir", "config.yaml")
 	customCfg := &config.Config{
-		Path: "/custom/dir/config.yaml",
+		Path: customPath,
 	}
-	if got := getLockFilePath(customCfg); got != "/custom/dir/sam.lock" {
-		t.Errorf("expected /custom/dir/sam.lock, got %s", got)
+	expected := filepath.Join(string(filepath.Separator)+"custom", "dir", "sam.lock")
+	if got := getLockFilePath(customCfg); got != expected {
+		t.Errorf("expected %s, got %s", expected, got)
 	}
 
 	// Nil config fallback

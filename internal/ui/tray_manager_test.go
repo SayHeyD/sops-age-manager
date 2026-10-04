@@ -40,7 +40,7 @@ func setupTestConfig(t *testing.T, encKey, decKey string) func() {
 		t.Fatalf("could not set config env: %v", err)
 	}
 
-	cfg := config.NewConfig(encKey, decKey, testDir.Path)
+	cfg := config.NewConfig(encKey, decKey, "")
 	if err := cfg.Write(); err != nil {
 		t.Fatalf("could not write test config: %v", err)
 	}
