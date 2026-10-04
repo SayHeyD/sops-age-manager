@@ -1,6 +1,6 @@
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
-CGO_ENABLED ?= $(if $(filter darwin,$(GOOS)),1,0)
+CGO_ENABLED ?= $(if $(filter darwin windows,$(GOOS)),1,0)
 EXT := $(if $(filter windows,$(GOOS)),.exe,)
 OUTPUT ?= sam$(EXT)
 
