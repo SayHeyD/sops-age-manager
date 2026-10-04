@@ -22,7 +22,8 @@ var (
 		Short: "Copy key attributes (public key, private key, or name) to clipboard",
 		Long: `Copies the recipient public key (age1...), private key, or key name 
 of the specified key to the system clipboard. By default, the public key is copied.`,
-		Args: cobra.ExactArgs(1),
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completeKeyNames,
 		Run: func(cmd *cobra.Command, args []string) {
 			copyKey(args[0])
 		},

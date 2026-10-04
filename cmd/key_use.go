@@ -19,6 +19,7 @@ var (
 performed with sops f.ex. decrypting and encrypting files. Decryption and encryption 
 keys can be set independently. Not specifying any flags will set the key for both
 decryption and encryption.`,
+		ValidArgsFunction: completeKeyNames,
 		Run: func(cmd *cobra.Command, args []string) {
 			setActiveKey(args[0])
 		},
