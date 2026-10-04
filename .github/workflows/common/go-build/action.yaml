@@ -19,7 +19,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Setup
       uses: ./.github/workflows/common/go-setup
@@ -30,7 +30,7 @@ runs:
       shell: bash
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ inputs.ARTIFACT_NAME }}
         path: bin/*
