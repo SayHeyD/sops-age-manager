@@ -14,7 +14,8 @@ runs:
     - name: Install ubuntu dev dependencies
       if: runner.os == 'Linux'
       run: |
-        sudo apt-get install golang gcc gobjc libgl1-mesa-dev xorg-dev -y
+        sudo apt-get update
+        sudo apt-get install gcc gobjc libgl1-mesa-dev xorg-dev -y
       shell: bash
 
     - name: Install go dependencies
