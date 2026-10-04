@@ -94,8 +94,8 @@ func TestNewTrayManagerNoKeys(t *testing.T) {
 		t.Fatal("expected SetSystemTrayMenu to be called")
 	}
 
-	if len(desk.menu.Items) != 1 {
-		t.Fatalf("expected 1 root menu item, got %d", len(desk.menu.Items))
+	if len(desk.menu.Items) != 5 {
+		t.Fatalf("expected 5 root menu items, got %d", len(desk.menu.Items))
 	}
 
 	keysItem := desk.menu.Items[0]
@@ -114,6 +114,16 @@ func TestNewTrayManagerNoKeys(t *testing.T) {
 
 	if !noKeysItem.Disabled {
 		t.Fatal("expected 'No keys found' item to be disabled")
+	}
+
+	if desk.menu.Items[1].Label != "Clear Active Keys" {
+		t.Errorf("expected 'Clear Active Keys', got '%s'", desk.menu.Items[1].Label)
+	}
+	if desk.menu.Items[3].Label != "Open Config Directory" {
+		t.Errorf("expected 'Open Config Directory', got '%s'", desk.menu.Items[3].Label)
+	}
+	if desk.menu.Items[4].Label != "Open Key Directory" {
+		t.Errorf("expected 'Open Key Directory', got '%s'", desk.menu.Items[4].Label)
 	}
 
 	// Calling Refresh when no keys are loaded should not panic
@@ -142,8 +152,8 @@ func TestTrayManagerRefresh(t *testing.T) {
 		t.Fatalf("expected root menu label 'SAM', got '%s'", desk.menu.Label)
 	}
 
-	if len(desk.menu.Items) != 1 {
-		t.Fatalf("expected 1 root menu item, got %d", len(desk.menu.Items))
+	if len(desk.menu.Items) != 5 {
+		t.Fatalf("expected 5 root menu items, got %d", len(desk.menu.Items))
 	}
 
 	keysItem := desk.menu.Items[0]
@@ -153,6 +163,16 @@ func TestTrayManagerRefresh(t *testing.T) {
 
 	if len(keysItem.ChildMenu.Items) != 2 {
 		t.Fatalf("expected 2 key menu items, got %d", len(keysItem.ChildMenu.Items))
+	}
+
+	if desk.menu.Items[1].Label != "Clear Active Keys" {
+		t.Errorf("expected 'Clear Active Keys', got '%s'", desk.menu.Items[1].Label)
+	}
+	if desk.menu.Items[3].Label != "Open Config Directory" {
+		t.Errorf("expected 'Open Config Directory', got '%s'", desk.menu.Items[3].Label)
+	}
+	if desk.menu.Items[4].Label != "Open Key Directory" {
+		t.Errorf("expected 'Open Key Directory', got '%s'", desk.menu.Items[4].Label)
 	}
 
 	// Verify checkmarks on key-1 (encryption only) and key-2 (decryption only)
@@ -345,5 +365,98 @@ func TestTrayManagerHandleModeSelectionUpdatesViaWatcher(t *testing.T) {
 	if !tm.entries[1].bothItem.Checked || tm.entries[0].bothItem.Checked {
 		t.Errorf("expected key-2 to be both via watcher, got key2 both=%v, key1 both=%v",
 			tm.entries[1].bothItem.Checked, tm.entries[0].bothItem.Checked)
+	}
+}
+
+func TestTrayManagerOpenDirectoryMenuItems(t *testing.T) {
+	cleanup := setupTestConfig(t, "", "")
+	defer cleanup()
+
+	var openedPaths []string
+	origOpenCommand := openCommandFunc
+	defer func() { openCommandFunc = origOpenCommand }()
+
+	openCommandFunc = func(path string) error {
+		openedPaths = append(openedPaths, path)
+		return nil
+	}
+
+	desk := &mockDesktopApp{}
+	tm := NewTrayManager(desk, nil, nil)
+	if tm == nil {
+		t.Fatal("expected non-nil TrayManager")
+	}
+
+	// Menu Item 3: Open Config Directory
+	configItem := desk.menu.Items[3]
+	if configItem.Action == nil {
+		t.Fatal("expected action on Open Config Directory item")
+	}
+	configItem.Action()
+
+	// Menu Item 4: Open Key Directory
+	keyItem := desk.menu.Items[4]
+	if keyItem.Action == nil {
+		t.Fatal("expected action on Open Key Directory item")
+	}
+	keyItem.Action()
+
+	if len(openedPaths) != 2 {
+		t.Fatalf("expected 2 directory open invocations, got %d", len(openedPaths))
+	}
+}
+
+func TestTrayManagerClearActiveKeysMenuItem(t *testing.T) {
+	cleanup := setupTestConfig(t, "key-1", "key-2")
+	defer cleanup()
+
+	cfg, err := config.NewConfigFromFile()
+	if err != nil {
+		t.Fatalf("could not read config: %v", err)
+	}
+
+	desk := &mockDesktopApp{}
+	key1 := &key.Key{Name: "key-1", PublicKey: "pub1", PrivateKey: "priv1"}
+	key2 := &key.Key{Name: "key-2", PublicKey: "pub2", PrivateKey: "priv2"}
+	keys := []*key.Key{key1, key2}
+
+	tm := NewTrayManager(desk, keys, nil)
+	tm.Refresh()
+
+	if err := tm.StartWatching(cfg.Path); err != nil {
+		t.Fatalf("failed to start watching: %v", err)
+	}
+	defer tm.StopWatching()
+
+	// Initial check: key-1 enc checked, key-2 dec checked
+	if !tm.entries[0].encryptionItem.Checked || !tm.entries[1].decryptionItem.Checked {
+		t.Fatalf("expected initial checkmarks set")
+	}
+
+	// Click "Clear Active Keys"
+	clearItem := desk.menu.Items[1]
+	if clearItem.Action == nil {
+		t.Fatal("expected action on Clear Active Keys item")
+	}
+	clearItem.Action()
+
+	// Wait for watcher to trigger refresh
+	time.Sleep(200 * time.Millisecond)
+
+	// Verify all checkmarks are now unchecked
+	for i, entry := range tm.entries {
+		if entry.bothItem.Checked || entry.encryptionItem.Checked || entry.decryptionItem.Checked {
+			t.Errorf("entry %d has checked items after clear: both=%v, enc=%v, dec=%v",
+				i, entry.bothItem.Checked, entry.encryptionItem.Checked, entry.decryptionItem.Checked)
+		}
+	}
+
+	loadedCfg, err := config.NewConfigFromFile()
+	if err != nil {
+		t.Fatalf("failed to read config: %v", err)
+	}
+	if loadedCfg.EncryptionKeyName != "" || loadedCfg.DecryptionKeyName != "" {
+		t.Errorf("expected config keys to be cleared, got enc=%q, dec=%q",
+			loadedCfg.EncryptionKeyName, loadedCfg.DecryptionKeyName)
 	}
 }
