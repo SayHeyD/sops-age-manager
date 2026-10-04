@@ -55,8 +55,8 @@ func copyToClipboard(content string) func() {
 }
 
 func (e *keyEntry) updateChecked(activeEncKey, activeDecKey string) {
-	isEnc := e.key.Name == activeEncKey
-	isDec := e.key.Name == activeDecKey
+	isEnc := activeEncKey != "" && e.key.Name == activeEncKey
+	isDec := activeDecKey != "" && e.key.Name == activeDecKey
 
 	e.bothItem.Checked = isEnc && isDec
 	e.encryptionItem.Checked = isEnc && !isDec

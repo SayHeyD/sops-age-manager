@@ -45,7 +45,33 @@ func NewTrayManager(desk desktop.App, keys []*key.Key, logo []byte) *TrayManager
 	keySubMenu := fyne.NewMenuItem("Keys", func() {})
 	keySubMenu.ChildMenu = fyne.NewMenu("Key menu", menuItems...)
 
-	tm.menu = fyne.NewMenu("SAM", keySubMenu)
+	clearActiveKeysItem := fyne.NewMenuItem("Clear Active Keys", func() {
+		key.ClearActiveKeys()
+	})
+
+	openConfigDirItem := fyne.NewMenuItem("Open Config Directory", func() {
+		if err := OpenConfigDirectory(); err != nil {
+			log.Printf("could not open config directory: %v", err)
+		}
+	})
+
+	openKeyDirItem := fyne.NewMenuItem("Open Key Directory", func() {
+		var keyDir string
+		if cfg, err := config.NewConfigFromFile(); err == nil && cfg != nil {
+			keyDir = cfg.KeyDir
+		}
+		if err := OpenKeyDirectory(keyDir); err != nil {
+			log.Printf("could not open key directory: %v", err)
+		}
+	})
+
+	tm.menu = fyne.NewMenu("SAM",
+		keySubMenu,
+		clearActiveKeysItem,
+		fyne.NewMenuItemSeparator(),
+		openConfigDirItem,
+		openKeyDirItem,
+	)
 
 	if tm.desk != nil {
 		tm.desk.SetSystemTrayMenu(tm.menu)

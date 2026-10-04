@@ -83,3 +83,43 @@ func (k *Key) SetActiveBoth() {
 		log.Fatalf("Could not write application config: %v", err)
 	}
 }
+
+func ClearActiveEncryption() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.EncryptionKeyName = ""
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}
+
+func ClearActiveDecryption() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.DecryptionKeyName = ""
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}
+
+func ClearActiveKeys() {
+	appConfig, err := config.NewConfigFromFile()
+	if err != nil {
+		log.Fatalf("Could not get application config: %v", err)
+	}
+
+	appConfig.EncryptionKeyName = ""
+	appConfig.DecryptionKeyName = ""
+	err = appConfig.Write()
+	if err != nil {
+		log.Fatalf("Could not write application config: %v", err)
+	}
+}

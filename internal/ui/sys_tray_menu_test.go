@@ -86,8 +86,8 @@ func TestCreateSysTrayMenuNoKeys(t *testing.T) {
 		t.Fatal("expected menu to be created and set")
 	}
 
-	if len(deskApp.menu.Items) != 1 {
-		t.Fatalf("expected 1 root menu item, got %d", len(deskApp.menu.Items))
+	if len(deskApp.menu.Items) != 5 {
+		t.Fatalf("expected 5 root menu items, got %d", len(deskApp.menu.Items))
 	}
 
 	keysItem := deskApp.menu.Items[0]
@@ -106,6 +106,16 @@ func TestCreateSysTrayMenuNoKeys(t *testing.T) {
 
 	if !noKeysItem.Disabled {
 		t.Fatal("expected 'No keys found' item to be disabled")
+	}
+
+	if deskApp.menu.Items[1].Label != "Clear Active Keys" {
+		t.Errorf("expected 'Clear Active Keys', got '%s'", deskApp.menu.Items[1].Label)
+	}
+	if deskApp.menu.Items[3].Label != "Open Config Directory" {
+		t.Errorf("expected 'Open Config Directory', got '%s'", deskApp.menu.Items[3].Label)
+	}
+	if deskApp.menu.Items[4].Label != "Open Key Directory" {
+		t.Errorf("expected 'Open Key Directory', got '%s'", deskApp.menu.Items[4].Label)
 	}
 }
 

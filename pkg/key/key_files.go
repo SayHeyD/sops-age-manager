@@ -8,29 +8,38 @@ import (
 	"strings"
 )
 
-func FindAvailableKeys(keyDirPath string) ([]*Key, error) {
-	var keys []*Key
-
+func GetKeyDirPath(keyDirPath string) (string, error) {
 	if keyDirPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return nil, fmt.Errorf("cannot get the users home directory: %w", err)
+			return "", fmt.Errorf("cannot get the users home directory: %w", err)
 		}
 
 		keyDirPath = homeDir + string(os.PathSeparator) + ".age"
 	}
 
 	if _, err := os.Stat(keyDirPath); os.IsNotExist(err) {
-		log.Printf("key directory does not exist: %v\n", keyDirPath)
 		log.Printf("creating key directory: %v\n", keyDirPath)
 
-		if err := os.Mkdir(keyDirPath, 0700); err != nil {
-			return nil, fmt.Errorf("cannot create the key directory '%s': %w", keyDirPath, err)
+		if err := os.MkdirAll(keyDirPath, 0700); err != nil {
+			return "", fmt.Errorf("cannot create the key directory '%s': %w", keyDirPath, err)
 		}
 	}
 
+	return keyDirPath, nil
+}
+
+func FindAvailableKeys(keyDirPath string) ([]*Key, error) {
+	var keys []*Key
+
+	var err error
+	keyDirPath, err = GetKeyDirPath(keyDirPath)
+	if err != nil {
+		return nil, err
+	}
+
 	keyDir := os.DirFS(keyDirPath)
-	err := fs.WalkDir(keyDir, ".", func(path string, d fs.DirEntry, err error) error {
+	err = fs.WalkDir(keyDir, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}

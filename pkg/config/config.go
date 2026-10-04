@@ -82,6 +82,19 @@ func (c *Config) Raw() (string, error) {
 	return string(contentBytes), nil
 }
 
+func (c *Config) ClearEncryption() {
+	c.EncryptionKeyName = ""
+}
+
+func (c *Config) ClearDecryption() {
+	c.DecryptionKeyName = ""
+}
+
+func (c *Config) ClearAll() {
+	c.EncryptionKeyName = ""
+	c.DecryptionKeyName = ""
+}
+
 func (c *Config) Write() error {
 	configFileContentBytes, err := yaml.Marshal(c)
 	if err != nil {
@@ -97,7 +110,12 @@ func (c *Config) Write() error {
 	return nil
 }
 
-func getConfigDirPath() (string, error) {
+func GetConfigDirPath() (string, error) {
+	configPath := os.Getenv(configFileEnv)
+	if configPath != "" {
+		return filepath.Dir(configPath), nil
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", fmt.Errorf("cannot get the users home directory: %v", err)
@@ -106,7 +124,7 @@ func getConfigDirPath() (string, error) {
 	samConfigDir := homeDir + string(os.PathSeparator) + ".sops-age-manager"
 
 	if _, err := os.Stat(samConfigDir); os.IsNotExist(err) {
-		if err = os.Mkdir(samConfigDir, os.ModePerm); err != nil {
+		if err = os.MkdirAll(samConfigDir, os.ModePerm); err != nil {
 			return "", fmt.Errorf("cannot create the sops-age-manager config directory: %v", err)
 		}
 	}

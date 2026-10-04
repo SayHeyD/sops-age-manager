@@ -176,6 +176,10 @@ func TestConfigWriteGeneratesNewFileWhenNotExists(t *testing.T) {
 func TestGetConfigDirPathReturnsCorrectDirectory(t *testing.T) {
 	// t.Parallel()
 
+	if err := os.Unsetenv(configFileEnv); err != nil {
+		t.Fatalf("could not unset \"%s\"", configFileEnv)
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		t.Fatalf("An error occured while executing getting the users homedir: %v", err)
@@ -183,13 +187,13 @@ func TestGetConfigDirPathReturnsCorrectDirectory(t *testing.T) {
 
 	expectedConfigDir := homeDir + string(os.PathSeparator) + ".sops-age-manager"
 
-	configDir, err := getConfigDirPath()
+	configDir, err := GetConfigDirPath()
 	if err != nil {
-		t.Fatalf("An error occured while executing getConfigDirPath(): %v", err)
+		t.Fatalf("An error occured while executing GetConfigDirPath(): %v", err)
 	}
 
 	if configDir != expectedConfigDir {
-		t.Fatalf("The path returned by getConfigDirPath() \"%s\" did not match the expected value \"%s\"", configDir, expectedConfigDir)
+		t.Fatalf("The path returned by GetConfigDirPath() \"%s\" did not match the expected value \"%s\"", configDir, expectedConfigDir)
 	}
 }
 
