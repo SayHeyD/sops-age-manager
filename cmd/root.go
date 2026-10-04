@@ -18,6 +18,8 @@ var (
 	appVersion string
 	appLogo    []byte
 
+	launchUIFunc = launchUI
+
 	RootCmd = &cobra.Command{
 		Use:   "sam",
 		Short: "Sops-Age-Manager (SAM) is a tool for managing multiple age keys when using mozilla/sops",
@@ -63,7 +65,9 @@ func executeSops(args []string) {
 	}
 
 	if len(args) == 0 {
-		launchUI(appConfig, appLogo)
+		fmt.Println("Running UI ... 🚀")
+		fmt.Println("Ctrl+C to cancel")
+		launchUIFunc(appConfig, appLogo)
 		return
 	}
 
