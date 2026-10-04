@@ -48,6 +48,7 @@ func Execute(version string, logo []byte) {
 
 func init() {
 	cobra.OnInitialize()
+	cobra.MousetrapHelpText = ""
 
 	RootCmd.PersistentFlags().BoolVarP(&showVersion, "version", "v", false, "Shows the current version of sam")
 

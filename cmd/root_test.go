@@ -1,3 +1,13 @@
 package cmd
 
-// TODO: Write tests for all command execution methods
+import (
+	"testing"
+
+	"github.com/spf13/cobra"
+)
+
+func TestMousetrapDisabled(t *testing.T) {
+	if cobra.MousetrapHelpText != "" {
+		t.Errorf("expected cobra.MousetrapHelpText to be empty so Windows GUI launcher works, got %q", cobra.MousetrapHelpText)
+	}
+}
