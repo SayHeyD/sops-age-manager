@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -177,22 +176,16 @@ func TestCompletionUnsupportedShell(t *testing.T) {
 }
 
 func TestCompletionCommandExecutionViaRoot(t *testing.T) {
-	origStdout := os.Stdout
-	r, w, err := os.Pipe()
-	if err != nil {
-		t.Fatalf("failed to create pipe: %v", err)
-	}
-	os.Stdout = w
+	var buf bytes.Buffer
+	RootCmd.SetOut(&buf)
+	RootCmd.SetErr(&buf)
+	defer func() {
+		RootCmd.SetOut(nil)
+		RootCmd.SetErr(nil)
+	}()
 
 	RootCmd.SetArgs([]string{"completion", "bash"})
-	err = RootCmd.Execute()
-
-	_ = w.Close()
-	os.Stdout = origStdout
-
-	var buf bytes.Buffer
-	_, _ = io.Copy(&buf, r)
-
+	err := RootCmd.Execute()
 	if err != nil {
 		t.Fatalf("unexpected error executing RootCmd completion: %v", err)
 	}
